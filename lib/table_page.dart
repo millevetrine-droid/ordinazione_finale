@@ -38,16 +38,47 @@ class _TablePageState extends State<TablePage> {
           return ListTile(
             title: Text(item),
             trailing: quantity > 0
-                ? Text('$quantity', style: Theme.of(context).textTheme.headlineSmall)
-                : null,
-            onTap: () {
-              setState(() {
-                _orderedItems[item] = quantity + 1;
-              });
-              print('Ordinazione per il tavolo ${widget.tableNumber}: $_orderedItems');
-            },
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle),
+                        onPressed: () {
+                          setState(() {
+                            _orderedItems[item] = quantity - 1;
+                          });
+                        },
+                      ),
+                      Text('$quantity',
+                          style: Theme.of(context).textTheme.headlineSmall),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle),
+                        onPressed: () {
+                          setState(() {
+                            _orderedItems[item] = quantity + 1;
+                          });
+                        },
+                      ),
+                    ],
+                  )
+                : IconButton(
+                    icon: const Icon(Icons.add_circle),
+                    onPressed: () {
+                      setState(() {
+                        _orderedItems[item] = 1;
+                      });
+                    },
+                  ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _orderedItems.clear();
+          });
+        },
+        child: const Icon(Icons.delete_forever),
       ),
     );
   }

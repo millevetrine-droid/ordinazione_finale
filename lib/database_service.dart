@@ -10,6 +10,11 @@ class DatabaseService {
         as Stream<DocumentSnapshot<Map<String, dynamic>>>;
   }
 
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamAllOrders() {
+    return _ordersCollection.snapshots()
+        as Stream<QuerySnapshot<Map<String, dynamic>>>;
+  }
+
   Future<void> updateOrder(String tableId, Map<String, dynamic> updatedData) async {
     await _ordersCollection.doc(tableId).set(updatedData, SetOptions(merge: true));
   }

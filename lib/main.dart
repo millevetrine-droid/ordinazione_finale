@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ordinazione/order_list_page.dart';
 import 'package:ordinazione/table_list_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const TableListPage(),
+      home: TableListPage(),
     );
   }
 }

@@ -23,6 +23,34 @@ class _TablePageState extends State<TablePage> {
     'Birra'
   ];
 
+  // Funzione per mostrare un riepilogo dell'ordine
+  void _showOrderSummary() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Riepilogo Ordine'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: _orderedItems.keys.map((item) {
+                final quantity = _orderedItems[item];
+                return Text('$item: $quantity');
+              }).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Chiudi'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,7 +73,9 @@ class _TablePageState extends State<TablePage> {
                         icon: const Icon(Icons.remove_circle),
                         onPressed: () {
                           setState(() {
-                            _orderedItems[item] = quantity - 1;
+                            if (quantity > 0) {
+                              _orderedItems[item] = quantity - 1;
+                            }
                           });
                         },
                       ),
@@ -72,13 +102,25 @@ class _TablePageState extends State<TablePage> {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _orderedItems.clear();
-          });
-        },
-        child: const Icon(Icons.delete_forever),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: _showOrderSummary,
+            heroTag: "btn1",
+            child: const Icon(Icons.receipt),
+          ),
+          const SizedBox(width: 10),
+          FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                _orderedItems.clear();
+              });
+            },
+            heroTag: "btn2",
+            child: const Icon(Icons.delete_forever),
+          ),
+        ],
       ),
     );
   }

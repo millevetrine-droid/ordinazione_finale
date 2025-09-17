@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
-class Table1Page extends StatelessWidget {
-  const Table1Page({super.key});
+class TablePage extends StatelessWidget {
+  final int tableNumber;
+  
+  const TablePage({super.key, required this.tableNumber});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ordinazione Tavolo 1'),
+        title: Text('Ordinazione Tavolo $tableNumber'),
         backgroundColor: Colors.blue,
       ),
       body: const Center(

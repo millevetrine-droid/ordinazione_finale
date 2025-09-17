@@ -62,6 +62,16 @@ class OrderListPage extends StatelessWidget {
                       ...items.entries.map((entry) {
                         return Text('${entry.value} x ${entry.key}');
                       }).toList(),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            dbService.completeOrder(tableNumber);
+                          },
+                          child: const Text('Completato'),
+                        ),
+                      ),
                     ],
                   ),
                 ),

@@ -18,4 +18,8 @@ class DatabaseService {
   Future<void> updateOrder(String tableId, Map<String, dynamic> updatedData) async {
     await _ordersCollection.doc(tableId).set(updatedData, SetOptions(merge: true));
   }
+
+  Future<void> completeOrder(String tableId) async {
+    await _ordersCollection.doc(tableId).delete();
+  }
 }

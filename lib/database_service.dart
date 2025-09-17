@@ -22,4 +22,8 @@ class DatabaseService {
   Future<void> completeOrder(String tableId) async {
     await _ordersCollection.doc(tableId).delete();
   }
+
+  Future<void> cancelOrder(String tableId) async {
+    await _ordersCollection.doc(tableId).delete();
+  }
 }

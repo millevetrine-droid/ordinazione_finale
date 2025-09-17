@@ -1,228 +1,149 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'database_service.dart';
 
-class TableListPage extends StatelessWidget {
+// Elenco dei prodotti disponibili
+class MenuItem {
+  final String name;
+  final double price;
+
+  MenuItem(this.name, this.price);
+}
+
+final List<MenuItem> menu = [
+  MenuItem('Pizza Margherita', 7.50),
+  MenuItem('Pizza Marinara', 6.00),
+  MenuItem('Pizza Diavola', 8.50),
+  MenuItem('Acqua', 2.00),
+  MenuItem('Coca-Cola', 3.00),
+  MenuItem('Birra', 4.00),
+];
+
+class TableListPage extends StatefulWidget {
   const TableListPage({super.key});
+
+  @override
+  State<TableListPage> createState() => _TableListPageState();
+}
+
+class _TableListPageState extends State<TableListPage> {
+  final DatabaseService dbService = DatabaseService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tavoli Ristorante'),
+        title: const Text('Seleziona un tavolo'),
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16.0),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: 3,
           crossAxisSpacing: 16.0,
           mainAxisSpacing: 16.0,
-          childAspectRatio: 1.5,
         ),
         itemCount: 10,
         itemBuilder: (context, index) {
           final tableNumber = index + 1;
-          return TableCard(
-            tableNumber: tableNumber,
-            onTap: () {
-              _showOrderDialog(context, tableNumber);
-            },
-          );
+          return _buildTableCard(tableNumber);
         },
       ),
     );
   }
 
-  void _showOrderDialog(BuildContext context, int tableNumber) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return TableOrderDialog(
-          tableNumber: tableNumber,
-        );
-      },
-    );
-  }
-}
-
-class TableCard extends StatelessWidget {
-  final int tableNumber;
-  final VoidCallback onTap;
-
-  const TableCard({
-    super.key,
-    required this.tableNumber,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTableCard(int tableNumber) {
     return Card(
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      color: Colors.blue[100],
       child: InkWell(
-        onTap: onTap,
+        onTap: () => _showOrderDialog(tableNumber),
         child: Center(
           child: Text(
             'Tavolo $tableNumber',
-            style: const TextStyle(
-              fontSize: 24.0,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20),
           ),
         ),
       ),
     );
   }
-}
 
-class TableOrderDialog extends StatelessWidget {
-  final int tableNumber;
-  final DatabaseService _db = DatabaseService();
+  Future<void> _showOrderDialog(int tableNumber) async {
+    final docSnapshot = await dbService.streamOrder(tableNumber).first;
+    final currentOrder =
+        (docSnapshot.data()?['items'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(key, value as int),
+            ) ??
+            {};
 
-  TableOrderDialog({
-    super.key,
-    required this.tableNumber,
-  });
+    if (!context.mounted) return;
 
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-      stream: _db.streamOrder(tableNumber),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Si è verificato un errore');
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final Map<String, dynamic> orderData = snapshot.data?.data() ?? {};
-        final Map<String, int> currentOrder =
-            (orderData['items'] as Map<String, dynamic>?)?.map(
-                  (key, value) => MapEntry(key, value as int),
-                ) ??
-                {};
-
-        return AlertDialog(
-          title: Text('Ordine Tavolo $tableNumber'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Aggiungi prodotti:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Ordine Tavolo $tableNumber'),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ...menu.map((item) {
+                      return ListTile(
+                        title: Text(item.name),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (currentOrder.containsKey(item.name) &&
+                                (currentOrder[item.name] ?? 0) > 0)
+                              IconButton(
+                                icon: const Icon(Icons.remove),
+                                onPressed: () {
+                                  setState(() {
+                                    final itemCount =
+                                        (currentOrder[item.name] ?? 0) - 1;
+                                    if (itemCount > 0) {
+                                      currentOrder[item.name] = itemCount;
+                                    } else {
+                                      currentOrder.remove(item.name);
+                                    }
+                                  });
+                                },
+                              ),
+                            Text('${currentOrder[item.name] ?? 0}'),
+                            IconButton(
+                              icon: const Icon(Icons.add),
+                              onPressed: () {
+                                setState(() {
+                                  currentOrder[item.name] =
+                                      (currentOrder[item.name] ?? 0) + 1;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ],
                 ),
-                _buildMenuItem(context, currentOrder, 'Pizza Margherita'),
-                _buildMenuItem(context, currentOrder, 'Pizza Diavola'),
-                _buildMenuItem(context, currentOrder, 'Coca Cola'),
-                _buildMenuItem(context, currentOrder, 'Acqua'),
-                const SizedBox(height: 20),
-                const Text(
-                  'Riepilogo Ordine:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Annulla'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                 ),
-                ...currentOrder.entries.map((entry) {
-                  return Row(
-                    children: [
-                      Text('${entry.value} x ${entry.key}'),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () {
-                          _updateOrder(
-                            currentOrder,
-                            entry.key,
-                            isAdd: false,
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                }).toList(),
-                const Divider(),
-                Text(
-                  'Totale: €${_calculateTotal(currentOrder).toStringAsFixed(2)}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                TextButton(
+                  child: const Text('Salva'),
+                  onPressed: () {
+                    dbService.updateOrder(
+                        tableNumber.toString(), {'items': currentOrder});
+                    Navigator.of(context).pop();
+                  },
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => _clearOrder(),
-              child: const Text('Azzera'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Chiudi'),
-            ),
-          ],
+            );
+          },
         );
       },
-    );
-  }
-
-  void _updateOrder(
-    Map<String, int> currentOrder,
-    String item, {
-    required bool isAdd,
-  }) {
-    final Map<String, int> newOrder = Map.from(currentOrder);
-    if (isAdd) {
-      newOrder.update(item, (value) => value + 1, ifAbsent: () => 1);
-    } else {
-      if (newOrder.containsKey(item)) {
-        newOrder.update(item, (value) => value - 1);
-        if (newOrder[item]! <= 0) {
-          newOrder.remove(item);
-        }
-      }
-    }
-    _db.updateOrder(tableNumber.toString(), {'items': newOrder});
-  }
-
-  void _clearOrder() {
-    _db.updateOrder(tableNumber.toString(), {'items': {}});
-  }
-
-  double _calculateTotal(Map<String, int> order) {
-    double total = 0.0;
-    const menuPrices = {
-      'Pizza Margherita': 7.50,
-      'Pizza Diavola': 9.00,
-      'Coca Cola': 3.00,
-      'Acqua': 2.00,
-    };
-    order.forEach((item, quantity) {
-      if (menuPrices.containsKey(item)) {
-        total += menuPrices[item]! * quantity;
-      }
-    });
-    return total;
-  }
-
-  Widget _buildMenuItem(
-    BuildContext context,
-    Map<String, int> currentOrder,
-    String item,
-  ) {
-    return Row(
-      children: [
-        Expanded(child: Text(item)),
-        const Spacer(),
-        IconButton(
-          icon: const Icon(Icons.add_circle_outline),
-          onPressed: () {
-            _updateOrder(currentOrder, item, isAdd: true);
-          },
-        ),
-      ],
     );
   }
 }

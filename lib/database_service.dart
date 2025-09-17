@@ -11,19 +11,20 @@ class DatabaseService {
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> streamAllOrders() {
-    return _ordersCollection.snapshots()
+    return _ordersCollection.where('is_active', isEqualTo: true).snapshots()
         as Stream<QuerySnapshot<Map<String, dynamic>>>;
   }
 
   Future<void> updateOrder(String tableId, Map<String, dynamic> updatedData) async {
+    updatedData['is_active'] = true;
     await _ordersCollection.doc(tableId).set(updatedData, SetOptions(merge: true));
   }
 
   Future<void> completeOrder(String tableId) async {
-    await _ordersCollection.doc(tableId).delete();
+    await _ordersCollection.doc(tableId).update({'is_active': false});
   }
 
   Future<void> cancelOrder(String tableId) async {
-    await _ordersCollection.doc(tableId).delete();
+    await _ordersCollection.doc(tableId).update({'is_active': false});
   }
 }

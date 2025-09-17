@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ordinazione/table_1_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -16,7 +17,9 @@ class HomePage extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                // Azione per il pulsante 1
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const Table1Page()),
+                );
               },
               child: const Text('Tavolo 1'),
             ),

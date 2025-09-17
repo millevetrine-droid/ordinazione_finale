@@ -13,18 +13,29 @@ class _TablePageState extends State<TablePage> {
   // Mappa per tenere traccia degli articoli ordinati e delle loro quantità
   final Map<String, int> _orderedItems = {};
 
-  // Lista statica di articoli del menu
-  final List<String> menuItems = [
-    'Pizza Margherita',
-    'Spaghetti alla Carbonara',
-    'Risotto ai funghi',
-    'Acqua naturale',
-    'Coca-Cola',
-    'Birra'
+  // Lista di mappe per gli articoli del menu con nome e prezzo
+  final List<Map<String, dynamic>> menuItems = [
+    {'name': 'Pizza Margherita', 'price': 8.50},
+    {'name': 'Spaghetti alla Carbonara', 'price': 10.00},
+    {'name': 'Risotto ai funghi', 'price': 9.50},
+    {'name': 'Acqua naturale', 'price': 2.00},
+    {'name': 'Coca-Cola', 'price': 3.50},
+    {'name': 'Birra', 'price': 5.00},
   ];
+
+  // Funzione per calcolare il sub-totale dell'ordine
+  double _calculateSubtotal() {
+    double total = 0.0;
+    _orderedItems.forEach((item, quantity) {
+      final itemPrice = menuItems.firstWhere((element) => element['name'] == item)['price'] as double;
+      total += itemPrice * quantity;
+    });
+    return total;
+  }
 
   // Funzione per mostrare un riepilogo dell'ordine
   void _showOrderSummary() {
+    final subtotal = _calculateSubtotal();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -32,10 +43,15 @@ class _TablePageState extends State<TablePage> {
           title: const Text('Riepilogo Ordine'),
           content: SingleChildScrollView(
             child: ListBody(
-              children: _orderedItems.keys.map((item) {
-                final quantity = _orderedItems[item];
-                return Text('$item: $quantity');
-              }).toList(),
+              children: [
+                ..._orderedItems.keys.map((item) {
+                  final quantity = _orderedItems[item];
+                  return Text('$item: $quantity');
+                }).toList(),
+                const Divider(),
+                Text('Totale: €${subtotal.toStringAsFixed(2)}',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
             ),
           ),
           actions: <Widget>[
@@ -62,9 +78,12 @@ class _TablePageState extends State<TablePage> {
         itemCount: menuItems.length,
         itemBuilder: (context, index) {
           final item = menuItems[index];
-          final quantity = _orderedItems[item] ?? 0;
+          final itemName = item['name'] as String;
+          final itemPrice = item['price'] as double;
+          final quantity = _orderedItems[itemName] ?? 0;
           return ListTile(
-            title: Text(item),
+            title: Text(itemName),
+            subtitle: Text('€${itemPrice.toStringAsFixed(2)}'),
             trailing: quantity > 0
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
@@ -74,7 +93,7 @@ class _TablePageState extends State<TablePage> {
                         onPressed: () {
                           setState(() {
                             if (quantity > 0) {
-                              _orderedItems[item] = quantity - 1;
+                              _orderedItems[itemName] = quantity - 1;
                             }
                           });
                         },
@@ -85,7 +104,7 @@ class _TablePageState extends State<TablePage> {
                         icon: const Icon(Icons.add_circle),
                         onPressed: () {
                           setState(() {
-                            _orderedItems[item] = quantity + 1;
+                            _orderedItems[itemName] = quantity + 1;
                           });
                         },
                       ),
@@ -95,7 +114,7 @@ class _TablePageState extends State<TablePage> {
                     icon: const Icon(Icons.add_circle),
                     onPressed: () {
                       setState(() {
-                        _orderedItems[item] = 1;
+                        _orderedItems[itemName] = 1;
                       });
                     },
                   ),

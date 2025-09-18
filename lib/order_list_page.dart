@@ -28,45 +28,82 @@ class OrderListPage extends StatelessWidget {
             return const Center(child: Text('Nessun ordine attivo.'));
           }
 
-          return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index) {
-              final doc = snapshot.data!.docs[index];
-              final data = doc.data() as Map<String, dynamic>;
-              final tableNumber = doc.id;
-              final items = (data['items'] as Map<String, dynamic>).map(
-                (key, value) => MapEntry(key, value as int),
-              );
+          final orders = snapshot.data!.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return {
+              'id': doc.id,
+              'items': (data['items'] as Map<String, dynamic>).map(
+                    (key, value) => MapEntry(key, value as int),
+              ),
+              'ready': data['ready'] ?? false,
+            };
+          }).toList();
 
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                  title: Text('Tavolo $tableNumber'),
-                  subtitle: Text(
-                    items.entries
-                        .map((e) => '${e.value} x ${e.key}')
-                        .join('\n'),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          dbService.cancelOrder(tableNumber);
-                        },
-                      ),
-                    ],
+          final readyOrders = orders.where((order) => order['ready'] == true).toList();
+          final pendingOrders = orders.where((order) => order['ready'] == false).toList();
+
+          return ListView(
+            children: [
+              if (pendingOrders.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    'In Preparazione',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
-              );
-            },
+                ...pendingOrders.map((order) {
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: ListTile(
+                      title: Text('Tavolo ${order['id']}'),
+                      subtitle: Text(
+                        (order['items'] as Map<String, int>).entries.map((e) => '${e.value} x ${e.key}').join('\n'),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          dbService.cancelOrder(order['id'] as String);
+                        },
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ],
+              if (readyOrders.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    'Pronto per il Ritiro',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ...readyOrders.map((order) {
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    color: Colors.green[100],
+                    child: ListTile(
+                      title: Text('Tavolo ${order['id']}'),
+                      subtitle: Text(
+                        (order['items'] as Map<String, int>).entries.map((e) => '${e.value} x ${e.key}').join('\n'),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.check_circle, color: Colors.green),
+                        onPressed: () {
+                          // TODO: Implement logic to archive the order
+                          dbService.completeOrder(order['id'] as String);
+                        },
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ],
+            ],
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          // Simuliamo un ordine di prova per testare il sistema
           await dbService.createOrder(
             'tavolo_1',
             {

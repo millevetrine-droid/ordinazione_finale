@@ -40,6 +40,10 @@ class KitchenPage extends StatelessWidget {
                     (key, value) => MapEntry(key, value as int),
                   ) ??
                   {};
+              
+              if (orderData['ready'] == true) {
+                return const SizedBox.shrink();
+              }
 
               if (items.isEmpty) {
                 return const SizedBox.shrink();

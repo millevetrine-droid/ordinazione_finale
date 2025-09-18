@@ -13,7 +13,7 @@ class DatabaseService {
   }
 
   Future<void> completeOrder(String tableId) async {
-    // Logic to move the order to the archive or delete it
+    await _firestore.collection('ordini').doc(tableId).delete();
   }
 
   Future<void> markOrderAsReady(String tableId) async {

@@ -1,85 +1,78 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'database_service.dart';
+// lib/kitchen_page.dart
 
-class KitchenPage extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:ordinazione_finale/database_service.dart';
+import 'package:ordinazione_finale/models/order.dart';
+
+class KitchenPage extends StatefulWidget {
   const KitchenPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final DatabaseService dbService = DatabaseService();
+  _KitchenPageState createState() => _KitchenPageState();
+}
 
+class _KitchenPageState extends State<KitchenPage> {
+  late Future<List<Order>> _ordersFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _ordersFuture = DatabaseService().getOrders();
+  }
+
+  void _refreshOrders() {
+    setState(() {
+      _ordersFuture = DatabaseService().getOrders();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Monitor Cucina'),
+        title: const Text('Cucina'),
       ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: dbService.streamAllOrders(),
+      body: FutureBuilder<List<Order>>(
+        future: _ordersFuture,
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Si è verificato un errore'));
-          }
-
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('Nessun ordine attivo.'));
+          if (snapshot.hasError) {
+            return Center(child: Text('Errore: ${snapshot.error}'));
           }
 
-          final orders = snapshot.data!.docs;
+          final orders = snapshot.data ?? [];
+          if (orders.isEmpty) {
+            return const Center(child: Text('Nessun ordine in cucina.'));
+          }
 
           return ListView.builder(
             itemCount: orders.length,
             itemBuilder: (context, index) {
-              final orderDoc = orders[index];
-              final orderData = orderDoc.data();
-              final tableNumber = orderDoc.id;
-              final items = (orderData['items'] as Map<String, dynamic>?)?.map(
-                    (key, value) => MapEntry(key, value as int),
-                  ) ??
-                  {};
-              
-              if (orderData['ready'] == true) {
-                return const SizedBox.shrink();
-              }
-
-              if (items.isEmpty) {
-                return const SizedBox.shrink();
-              }
-
+              final order = orders[index];
               return Card(
-                margin: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Tavolo $tableNumber',
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
-                      ...items.entries.map((entry) {
-                        return Text('${entry.value} x ${entry.key}');
-                      }),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              dbService.markOrderAsReady(tableNumber);
-                            },
-                            child: const Text('Pronto'),
-                          ),
-                        ],
-                      ),
-                    ],
+                elevation: 4.0,
+                margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: ListTile(
+                  title: Text(
+                    'Ordine #${order.id}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
+                  subtitle: Text('Cliente: ${order.customerName}\nStato: ${order.status}'),
+                  trailing: order.status == 'In preparazione'
+                      ? ElevatedButton(
+                          onPressed: () {
+                            DatabaseService().markOrderAsReady(order.id);
+                            _refreshOrders();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Ordine #${order.id} segnato come pronto!')),
+                            );
+                          },
+                          child: const Text('Pronto'),
+                        )
+                      : null,
                 ),
               );
             },

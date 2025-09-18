@@ -1,79 +1,78 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'database_service.dart';
+// lib/archive_page.dart
 
-class ArchivePage extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:ordinazione_finale/database_service.dart';
+import 'package:ordinazione_finale/models/order.dart';
+
+class ArchivePage extends StatefulWidget {
   const ArchivePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final DatabaseService dbService = DatabaseService();
+  _ArchivePageState createState() => _ArchivePageState();
+}
 
+class _ArchivePageState extends State<ArchivePage> {
+  late Future<List<Order>> _archivedOrdersFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _archivedOrdersFuture = DatabaseService().getArchivedOrders();
+  }
+
+  void _refreshArchivedOrders() {
+    setState(() {
+      _archivedOrdersFuture = DatabaseService().getArchivedOrders();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ordini archiviati'),
+        title: const Text('Archivio Ordini'),
       ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: dbService.streamArchivedOrders(),
+      body: FutureBuilder<List<Order>>(
+        future: _archivedOrdersFuture,
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text('Si è verificato un errore'));
-          }
-
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('Nessun ordine archiviato.'));
+          if (snapshot.hasError) {
+            return Center(child: Text('Errore: ${snapshot.error}'));
           }
 
-          final orders = snapshot.data!.docs;
+          final orders = snapshot.data ?? [];
+          if (orders.isEmpty) {
+            return const Center(child: Text('Nessun ordine archiviato.'));
+          }
 
           return ListView.builder(
             itemCount: orders.length,
             itemBuilder: (context, index) {
-              final orderDoc = orders[index];
-              final orderData = orderDoc.data();
-              final tableNumber = orderDoc.id;
-              final items = (orderData['items'] as Map<String, dynamic>?)?.map(
-                    (key, value) => MapEntry(key, value as int),
-                  ) ??
-                  {};
-
-              if (items.isEmpty) {
-                return const SizedBox.shrink();
-              }
-
+              final order = orders[index];
               return Card(
-                margin: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Tavolo $tableNumber',
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
-                      ...items.entries.map((entry) {
-                        return Text('${entry.value} x ${entry.key}');
-                      }),
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: ElevatedButton(
+                elevation: 4.0,
+                margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: ListTile(
+                  title: Text(
+                    'Ordine #${order.id}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text('Cliente: ${order.customerName}\nStato: ${order.status}'),
+                  trailing: order.status == 'Completato'
+                      ? ElevatedButton(
                           onPressed: () {
-                            // Aggiungeremo la funzione di ripristino qui
+                            DatabaseService().restoreOrder(order.id);
+                            _refreshArchivedOrders();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Ordine #${order.id} ripristinato!')),
+                            );
                           },
                           child: const Text('Ripristina'),
-                        ),
-                      ),
-                    ],
-                  ),
+                        )
+                      : null,
                 ),
               );
             },

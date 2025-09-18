@@ -4,7 +4,7 @@ import 'database_service.dart';
 import 'archive_page.dart';
 
 class OrderListPage extends StatelessWidget {
-  const OrderListPage({super.key});
+  OrderListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,10 +12,10 @@ class OrderListPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ordini in tempo reale'),
+        title: Text('Ordini in tempo reale'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.archive),
+            icon: Icon(Icons.archive),
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -30,15 +30,15 @@ class OrderListPage extends StatelessWidget {
         stream: dbService.streamAllOrders(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text('Si è verificato un errore'));
+            return Center(child: Text('Si è verificato un errore'));
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('Nessun ordine attivo.'));
+            return Center(child: Text('Nessun ordine attivo.'));
           }
 
           final orders = snapshot.data!.docs;
@@ -55,27 +55,27 @@ class OrderListPage extends StatelessWidget {
                   {};
 
               if (items.isEmpty) {
-                return const SizedBox.shrink();
+                return SizedBox.shrink();
               }
 
               return Card(
-                margin: const EdgeInsets.symmetric(
+                margin: EdgeInsets.symmetric(
                     horizontal: 16.0, vertical: 8.0),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Tavolo $tableNumber',
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       ...items.entries.map((entry) {
                         return Text('${entry.value} x ${entry.key}');
-                      }).toList(),
-                      const SizedBox(height: 10),
+                      }),
+                      SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -83,14 +83,14 @@ class OrderListPage extends StatelessWidget {
                             onPressed: () {
                               dbService.cancelOrder(tableNumber);
                             },
-                            child: const Text('Cancella'),
+                            child: Text('Cancella'),
                           ),
-                          const SizedBox(width: 10),
+                          SizedBox(width: 10),
                           ElevatedButton(
                             onPressed: () {
                               dbService.completeOrder(tableNumber);
                             },
-                            child: const Text('Completato'),
+                            child: Text('Completato'),
                           ),
                         ],
                       ),

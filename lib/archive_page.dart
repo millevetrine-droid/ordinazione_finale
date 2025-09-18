@@ -61,7 +61,7 @@ class ArchivePage extends StatelessWidget {
                       const SizedBox(height: 10),
                       ...items.entries.map((entry) {
                         return Text('${entry.value} x ${entry.key}');
-                      }).toList(),
+                      }),
                       const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.bottomRight,

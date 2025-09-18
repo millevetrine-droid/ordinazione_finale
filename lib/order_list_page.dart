@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'database_service.dart';
-import 'archive_page.dart';
 
 class OrderListPage extends StatelessWidget {
-  OrderListPage({super.key});
+  const OrderListPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,87 +11,50 @@ class OrderListPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ordini in tempo reale'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.archive),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => ArchivePage(),
-                ),
-              );
-            },
-          ),
-        ],
+        title: const Text('Ordini in Tempo Reale'),
       ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      body: StreamBuilder<QuerySnapshot>(
         stream: dbService.streamAllOrders(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text('Si è verificato un errore'));
+            return const Center(child: Text('Si è verificato un errore'));
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('Nessun ordine attivo.'));
+            return const Center(child: Text('Nessun ordine attivo.'));
           }
 
-          final orders = snapshot.data!.docs;
-
           return ListView.builder(
-            itemCount: orders.length,
+            itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
-              final orderDoc = orders[index];
-              final orderData = orderDoc.data();
-              final tableNumber = orderDoc.id;
-              final items = (orderData['items'] as Map<String, dynamic>?)?.map(
-                    (key, value) => MapEntry(key, value as int),
-                  ) ??
-                  {};
-
-              if (items.isEmpty) {
-                return SizedBox.shrink();
-              }
+              final doc = snapshot.data!.docs[index];
+              final data = doc.data() as Map<String, dynamic>;
+              final tableNumber = doc.id;
+              final items = (data['items'] as Map<String, dynamic>).map(
+                (key, value) => MapEntry(key, value as int),
+              );
 
               return Card(
-                margin: EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 8.0),
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  title: Text('Tavolo $tableNumber'),
+                  subtitle: Text(
+                    items.entries
+                        .map((e) => '${e.value} x ${e.key}')
+                        .join('\n'),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'Tavolo $tableNumber',
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 10),
-                      ...items.entries.map((entry) {
-                        return Text('${entry.value} x ${entry.key}');
-                      }),
-                      SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              dbService.cancelOrder(tableNumber);
-                            },
-                            child: Text('Cancella'),
-                          ),
-                          SizedBox(width: 10),
-                          ElevatedButton(
-                            onPressed: () {
-                              dbService.completeOrder(tableNumber);
-                            },
-                            child: Text('Completato'),
-                          ),
-                        ],
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          dbService.cancelOrder(tableNumber);
+                        },
                       ),
                     ],
                   ),
@@ -101,6 +63,22 @@ class OrderListPage extends StatelessWidget {
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          // Simuliamo un ordine di prova per testare il sistema
+          await dbService.createOrder(
+            'tavolo_1',
+            {
+              'pizza_margherita': 2,
+              'coca_cola': 3,
+            },
+          );
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Ordine di prova creato per Tavolo 1')),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

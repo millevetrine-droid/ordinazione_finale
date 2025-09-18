@@ -1,35 +1,35 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class DatabaseService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final CollectionReference _ordersCollection =
-      FirebaseFirestore.instance.collection('orders');
-
-  Stream<DocumentSnapshot<Map<String, dynamic>>> streamOrder(int tableNumber) {
-    return _ordersCollection.doc(tableNumber.toString()).snapshots()
-        as Stream<DocumentSnapshot<Map<String, dynamic>>>;
-  }
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot<Map<String, dynamic>>> streamAllOrders() {
-    return _ordersCollection.where('is_active', isEqualTo: true).snapshots()
-        as Stream<QuerySnapshot<Map<String, dynamic>>>;
-  }
-
-  Stream<QuerySnapshot<Map<String, dynamic>>> streamArchivedOrders() {
-    return _ordersCollection.where('is_active', isEqualTo: false).snapshots()
-        as Stream<QuerySnapshot<Map<String, dynamic>>>;
-  }
-
-  Future<void> updateOrder(String tableId, Map<String, dynamic> updatedData) async {
-    updatedData['is_active'] = true;
-    await _ordersCollection.doc(tableId).set(updatedData, SetOptions(merge: true));
-  }
-
-  Future<void> completeOrder(String tableId) async {
-    await _ordersCollection.doc(tableId).update({'is_active': false});
+    return _firestore.collection('ordini').snapshots();
   }
 
   Future<void> cancelOrder(String tableId) async {
-    await _ordersCollection.doc(tableId).update({'is_active': false});
+    await _firestore.collection('ordini').doc(tableId).delete();
+  }
+
+  Future<void> completeOrder(String tableId) async {
+    // Logic to move the order to the archive or delete it
+  }
+
+  Future<void> markOrderAsReady(String tableId) async {
+    final orderDoc = _firestore.collection('ordini').doc(tableId);
+    await orderDoc.update({'ready': true});
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> streamArchivedOrders() {
+    return _firestore.collection('archiviati').snapshots();
+  }
+  
+  Future<void> createOrder(String tableNumber, Map<String, int> items) async {
+    await _firestore.collection('ordini').doc(tableNumber).set({
+      'items': items,
+      'timestamp': FieldValue.serverTimestamp(),
+      'ready': false,
+    });
   }
 }

@@ -66,6 +66,18 @@ class _OrderListPageState extends State<OrderListPage> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text('Cliente: ${order.customerName}\nStato: ${order.status}'),
+                  trailing: order.status == 'In consegna'
+                      ? ElevatedButton(
+                          onPressed: () {
+                            DatabaseService().completeOrder(order.id);
+                            _refreshOrders();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Ordine #${order.id} consegnato!')),
+                            );
+                          },
+                          child: const Text('Consegna'),
+                        )
+                      : null,
                 ),
               );
             },

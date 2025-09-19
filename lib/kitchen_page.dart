@@ -44,35 +44,55 @@ class _KitchenPageState extends State<KitchenPage> {
           }
 
           final orders = snapshot.data ?? [];
-          if (orders.isEmpty) {
+          final kitchenOrders = orders.where((order) => order.status == 'In preparazione').toList();
+
+          if (kitchenOrders.isEmpty) {
             return const Center(child: Text('Nessun ordine in cucina.'));
           }
 
           return ListView.builder(
-            itemCount: orders.length,
+            itemCount: kitchenOrders.length,
             itemBuilder: (context, index) {
-              final order = orders[index];
+              final order = kitchenOrders[index];
               return Card(
                 elevation: 4.0,
                 margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                child: ListTile(
-                  title: Text(
-                    'Ordine #${order.id}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ordine #${order.id} - Tavolo ${order.tableNumber}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      const SizedBox(height: 10),
+                      ...order.items.where((item) => item.itemStatus == 'In preparazione').map((item) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                item.itemName,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  DatabaseService().markItemAsReady(order.id, item.itemName);
+                                  _refreshOrders();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('${item.itemName} segnato come pronto!')),
+                                  );
+                                },
+                                child: const Text('Pronto'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
                   ),
-                  subtitle: Text('Cliente: ${order.customerName}\nStato: ${order.status}'),
-                  trailing: order.status == 'In preparazione'
-                      ? ElevatedButton(
-                          onPressed: () {
-                            DatabaseService().markOrderAsReady(order.id);
-                            _refreshOrders();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Ordine #${order.id} segnato come pronto!')),
-                            );
-                          },
-                          child: const Text('Pronto'),
-                        )
-                      : null,
                 ),
               );
             },

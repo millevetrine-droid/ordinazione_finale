@@ -1,22 +1,38 @@
 // lib/models/order.dart
 
+import 'package:flutter/material.dart';
+
 class Order {
   final int id;
-  final String customerName;
+  final int tableNumber;
+  final List<OrderItem> items;
   String status;
-  // Aggiungi qui altre proprietà del tuo ordine, come prodotti, prezzi, ecc.
 
   Order({
     required this.id,
-    required this.customerName,
+    required this.tableNumber,
+    required this.items,
     required this.status,
   });
+}
 
-  factory Order.fromMap(Map<String, dynamic> map) {
-    return Order(
-      id: map['id'],
-      customerName: map['customerName'],
-      status: map['status'],
-    );
-  }
+class OrderItem {
+  final String itemName;
+  String itemStatus;
+
+  OrderItem({
+    required this.itemName,
+    required this.itemStatus,
+  });
+}
+
+// Nuovo modello per i piatti pronti per la consegna
+class ReadyItemForDelivery {
+  final OrderItem item;
+  final int tableNumber;
+
+  ReadyItemForDelivery({
+    required this.item,
+    required this.tableNumber,
+  });
 }

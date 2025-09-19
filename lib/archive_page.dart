@@ -62,10 +62,17 @@ class _ArchivePageState extends State<ArchivePage> {
               margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               child: ListTile(
                 title: Text(
-                  'Ordine #${order.id}',
+                  'Ordine #${order.id} - Tavolo ${order.tableNumber}',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: Text('Cliente: ${order.customerName}\nStato: ${order.status}'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Stato: ${order.status}'),
+                    const Text('Piatti:'),
+                    ...order.items.map((item) => Text('- ${item.itemName}')).toList(),
+                  ],
+                ),
                 trailing: ElevatedButton(
                   onPressed: () {
                     DatabaseService().restoreOrder(order.id);

@@ -72,4 +72,17 @@ dart run tool\migra_color_offerte.dart
 Assicurati di eseguire questi comandi in ambiente di sviluppo e di avere i permessi
 necessari per modificare i documenti Firestore.
 
+Opzioni utili del CLI:
+
+```powershell
+# Conta i documenti che verrebbero aggiornati (nessuna scrittura)
+dart run tool\migra_color_offerte.dart --dry-run
+
+# Stampa un campione dei primi 10 documenti (mostra il campo `colore` grezzo)
+dart run tool\migra_color_offerte.dart --sample 10
+
+# Esegue la migrazione reale (scrive su Firestore)
+dart run tool\migra_color_offerte.dart
+```
+
 

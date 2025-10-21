@@ -13,22 +13,25 @@ if (-Not (Test-Path $backupDir)) {
 }
 
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
-$dest = Join-Path $backupDir "ordinazione-backup-$timestamp.zip"
+# Use a unique suffix (PID + short GUID) to avoid collisions with files in use
+$unique = "${([System.Diagnostics.Process]::GetCurrentProcess().Id)}-${([System.Guid]::NewGuid().ToString('N').Substring(0,8))}"
+$dest = Join-Path $backupDir "ordinazione-backup-$timestamp-$unique.zip"
 
 # Exclude common heavy/irrelevant folders to keep the backup small and avoid
 # packaging build artifacts or IDE caches.
 
-$exclude = @(
-  (Join-Path $root 'build'),
-  (Join-Path $root 'android' 'build'),
-  (Join-Path $root '.gradle'),
-  (Join-Path $root 'ios' 'Pods'),
-  (Join-Path $root 'backups')
-)
+
+$exclude = @()
+$exclude += Join-Path $root 'build'
+$exclude += Join-Path $root 'android\build'
+$exclude += Join-Path $root '.gradle'
+$exclude += Join-Path $root 'ios\Pods'
+$exclude += Join-Path $root 'backups'
 
 $items = Get-ChildItem -Path $root -Force | Where-Object {
   $full = $_.FullName
-  -not ($exclude -contains $full)
+  # Exclude any path that is inside one of the exclude folders
+  -not ($exclude | Where-Object { $full.StartsWith($_, [System.StringComparison]::InvariantCultureIgnoreCase) })
 }
 
 $paths = $items | ForEach-Object { $_.FullName }

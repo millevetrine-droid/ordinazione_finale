@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "1015497862392",
-    "project_id": "app-ordinazione-ristorante",
-    "storage_bucket": "app-ordinazione-ristorante.firebasestorage.app"
+    "project_number": "540813992145",
+    "project_id": "ordinazione-ristorante-71a70",
+    "storage_bucket": "ordinazione-ristorante-71a70.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1015497862392:android:0237f8fc9bd9bb871c5f0d",
+        "mobilesdk_app_id": "1:540813992145:android:7474a38da35a82eb5aa5f0",
         "android_client_info": {
           "package_name": "com.example.ordinazione"
         }
@@ -15,7 +15,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCzSXFAAYJ4KaHqK6SbeSRJmFDlzXKsyj0"
+          "current_key": "AIzaSyA0gw07rrNLlCOhverPx5vXKZircrNU3MU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:540813992145:android:91bccac1193fa6aa5aa5f0",
+        "android_client_info": {
+          "package_name": "com.ordinazione.ristorante"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0gw07rrNLlCOhverPx5vXKZircrNU3MU"
         }
       ],
       "services": {

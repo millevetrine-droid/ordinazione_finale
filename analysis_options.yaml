@@ -24,19 +24,20 @@ linter:
     # avoid_print: false  # Uncomment to disable the `avoid_print` rule
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
 
-# Exclude large backup/merged folders and build outputs from static analysis.
-# These folders contain historical copies of the app (and in-repo Flutter copies)
-# which cause analysis to report many unrelated errors. Excluding them keeps
-# `flutter analyze` and IDE diagnostics focused on the active source.
+# Exclude generated / third-party tooling code and sandboxed extracted lib to
+# avoid polluting the analyzer results with unrelated errors.
 analyzer:
   exclude:
-    - "**/lib_backup_pre_merge_*/**"
-    - "**/lib_merged_*/**"
-    - "**/backups/**"
-    - "**/build/**"
-    - "**/coverage/**"
-    - "**/.dart_tool/**"
-    - "**/.pub-cache/**"
+    - "lib/flutter/**"
+    - "lib_new/**"
+    - "lib_merged_20251020_195306/flutter/**"
+    - "lib_merged_20251020_195306/**/flutter/**"
+    - "backups/**"
+    - "lib_backup_pre_merge_*/**"
+    - "lib_backup_before_run_*/**"
+    - "lib_backup_*/**"
+    - "lib_merged_*/**"
+    - "build/**"
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

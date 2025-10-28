@@ -1,8 +1,9 @@
 // lib/waiter_order_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:ordinazione_finale/database_service.dart';
-import 'package:ordinazione_finale/models/order.dart';
+import 'package:ordinazione/database_service.dart';
+import 'package:ordinazione/models/order.dart';
+import 'package:ordinazione/models/item.dart';
 
 class WaiterOrderPage extends StatefulWidget {
   const WaiterOrderPage({super.key});
@@ -31,8 +32,8 @@ class _WaiterOrderPageState extends State<WaiterOrderPage> {
           ),
         ],
       ),
-      body: StreamBuilder<List<Order>>(
-        stream: DatabaseService().getOrders(),
+      body: FutureBuilder<List<Order>>(
+        future: DatabaseService().getOrders(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('Errore: ${snapshot.error}'));
@@ -40,7 +41,7 @@ class _WaiterOrderPageState extends State<WaiterOrderPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          
+
           final allOrders = snapshot.data ?? [];
           final itemsToShow = allOrders
               .expand((order) => order.items.map((item) => ReadyItemForDelivery(
@@ -66,7 +67,7 @@ class _WaiterOrderPageState extends State<WaiterOrderPage> {
                 margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 child: ListTile(
                   title: Text(item.item.itemName),
-                  subtitle: Text('Tavolo ${item.tableNumber} - Stato: ${item.item.itemStatus.name}'),
+                  subtitle: Text('Tavolo ${item.tableNumber} - Stato: ${item.item.itemStatus}'),
                   trailing: _showInPreparation
                       ? null
                       : IconButton(

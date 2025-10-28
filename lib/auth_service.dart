@@ -1,7 +1,7 @@
 // lib/auth_service.dart
 
 import 'dart:async';
-import 'package:ordinazione_finale/models/staff.dart';
+import 'package:ordinazione/models/staff.dart';
 
 class AuthService {
   static final AuthService _instance = AuthService._internal();

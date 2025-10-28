@@ -1,7 +1,7 @@
 // lib/menu_service.dart
 
 import 'dart:async';
-import 'package:ordinazione_finale/models/menu_item.dart';
+import 'package:ordinazione/models/menu_item.dart';
 
 class MenuService {
   static final MenuService _instance = MenuService._internal();

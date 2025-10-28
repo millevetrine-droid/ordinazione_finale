@@ -1,1 +1,30 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"app-ordinazione-ristorante","configurations":{"web":"1:1015497862392:web:6e7e44c966138a301c5f0d"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "ordinazione-ristorante-71a70",
+          "appId": "1:540813992145:android:7474a38da35a82eb5aa5f0",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "ordinazione-ristorante-71a70",
+          "configurations": {
+            "android": "1:540813992145:android:7474a38da35a82eb5aa5f0"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  }
+}

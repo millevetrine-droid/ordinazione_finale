@@ -1,12 +1,18 @@
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// (No direct-apply workaround here) The Flutter Gradle plugin is provided by the
+// included-build configured in android/settings.gradle.kts (recommended).
+
 android {
-    namespace = "com.example.ordinazione_finale"
+    namespace = "com.example.ordinazione"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +27,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.ordinazione_finale"
+        applicationId = "com.example.ordinazione"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -38,7 +44,6 @@ android {
         }
     }
 }
-
 flutter {
     source = "../.."
 }

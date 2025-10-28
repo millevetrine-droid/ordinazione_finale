@@ -1,7 +1,7 @@
 // lib/customer_service.dart
 
 import 'dart:async';
-import 'package:ordinazione_finale/models/customer.dart';
+import 'package:ordinazione/models/customer.dart';
 
 class CustomerService {
   static final CustomerService _instance = CustomerService._internal();

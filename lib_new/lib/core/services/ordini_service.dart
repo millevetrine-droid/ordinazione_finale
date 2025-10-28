@@ -12,8 +12,8 @@ library;
 import 'dart:async'; // ✅ AGGIUNTO PER StreamSubscription
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import '../models/ordine_model.dart';
-import '../models/pietanza_model.dart'; // ✅ AGGIUNTO
+import 'package:ordinazione/core/models/ordine_model.dart';
+import 'package:ordinazione/core/models/pietanza_model.dart'; // ✅ AGGIUNTO
 
 class OrdiniService {
   final FirebaseFirestore _firestore;

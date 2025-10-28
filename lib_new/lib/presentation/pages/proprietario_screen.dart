@@ -45,16 +45,17 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/providers/ordini_provider.dart';
-import '../../core/providers/auth_provider.dart';
-import '../../core/providers/menu_provider.dart';
-import '../../core/models/ordine_model.dart';
-import '../../core/models/macrocategoria_model.dart';
-import '../../core/models/categoria_model.dart';
-import '../../core/models/pietanza_model.dart';
-import '../../features/home/widgets/bottom_nav_bar.dart';
-import 'cucina/widgets/ordine_card.dart';
-import 'inserisci_pietanza_screen.dart';
+import 'package:ordinazione/core/providers/ordini_provider.dart';
+import 'package:ordinazione/core/providers/auth_provider.dart';
+import 'package:ordinazione/core/providers/menu_provider.dart';
+import 'package:ordinazione/core/models/ordine_model.dart';
+import 'package:ordinazione/core/models/macrocategoria_model.dart';
+import 'package:ordinazione/core/models/categoria_model.dart';
+import 'package:ordinazione/core/models/pietanza_model.dart';
+import 'package:ordinazione/features/home/widgets/bottom_nav_bar.dart';
+import 'package:ordinazione/presentation/pages/cucina/widgets/ordine_card.dart';
+import 'package:ordinazione/presentation/pages/inserisci_pietanza_screen.dart';
+import 'package:ordinazione/presentation/pages/gestione_offerte_screen.dart';
 
 // === CLASSE: PROPRIETARIO SCREEN ===
 // Scopo: Schermata stateful principale per il proprietario con gestione completa
@@ -489,6 +490,16 @@ class _ProprietarioScreenState extends State<ProprietarioScreen> {
                       content: Text('Seleziona un ordine per stampare lo scontrino'),
                       backgroundColor: Colors.purple,
                     ),
+                  );
+                },
+              ),
+              _buildActionCard(
+                'Gestione Offerte',
+                Icons.card_giftcard,
+                Colors.pink,
+                    () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const GestioneOfferteScreen()),
                   );
                 },
               ),

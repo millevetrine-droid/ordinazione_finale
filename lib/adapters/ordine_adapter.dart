@@ -1,43 +1,52 @@
-import '../models/ordine_model.dart';
+import 'package:ordinazione/core/models/ordine_model.dart';
+import 'package:ordinazione/core/models/pietanza_model.dart' show Pietanza;
 
 class OrdineAdapter {
-  /// Convert a Map coming from lib_new into local `Ordine`.
-  static Ordine fromNewMap(String id, Map<String, dynamic> m) {
-    final tavolo = (m['tavolo'] ?? 'N/A') as String;
-    final numeroPersone = (m['numeroPersone'] is int) ? m['numeroPersone'] as int : ((m['numeroPersone'] is num) ? (m['numeroPersone'] as num).toInt() : 1);
+  /// Convert a Map coming from the lib_new schema into the core Ordine model.
+  static Ordine fromNewMap(String id, Map<String, dynamic> data) {
+    final tavolo = (data['tavolo'] ?? 'N/A') as String;
 
-    final pietanzeRaw = m['pietanze'] as List? ?? [];
+    final pietanzeRaw = data['pietanze'] as List? ?? const [];
     final pietanze = pietanzeRaw.map((p) {
       final map = Map<String, dynamic>.from(p as Map);
-      return PietanzaOrdine.fromMap(map);
+      // Use core Pietanza.fromMap; if fields are missing, Pietanza.fromMap handles defaults.
+      return Pietanza.fromMap(map);
     }).toList();
 
-    final timestampRaw = m['timestamp'];
-    DateTime timestamp;
+    final timestampRaw = data['timestamp'];
+    final DateTime timestamp;
     if (timestampRaw is DateTime) {
       timestamp = timestampRaw;
     } else if (timestampRaw is int) {
       timestamp = DateTime.fromMillisecondsSinceEpoch(timestampRaw);
+    } else if (timestampRaw is String) {
+      timestamp = DateTime.tryParse(timestampRaw) ?? DateTime.now();
     } else {
       timestamp = DateTime.now();
     }
 
-    final accumulaPunti = m['accumulaPunti'] ?? false;
-    final statoComplessivo = m['statoComplessivo'] ?? 'in_attesa';
+    // Map string status to enum if possible
+    final statoStr = (data['statoComplessivo'] ?? 'in_attesa') as String;
+    StatoOrdine stato = StatoOrdine.inAttesa;
+    if (statoStr.contains('prepar')) stato = StatoOrdine.inPreparazione;
+    if (statoStr.contains('pronto')) stato = StatoOrdine.pronto;
+    if (statoStr.contains('servito')) stato = StatoOrdine.servito;
+    if (statoStr.contains('complet')) stato = StatoOrdine.completato;
 
-    final totale = pietanze.fold(0.0, (sum, p) => sum + (p.prezzo * p.quantita));
+    final idCameriere = (data['idCameriere'] ?? '') as String;
+    final noteParts = <String>[];
+    if (data['telefonoCliente'] != null) noteParts.add('tel:${data['telefonoCliente']}');
+    if (data['nomeCliente'] != null) noteParts.add('nome:${data['nomeCliente']}');
+    final note = noteParts.join(' ');
 
     return Ordine(
       id: id,
-      tavolo: tavolo,
+      numeroTavolo: tavolo,
       pietanze: pietanze,
+      stato: stato,
       timestamp: timestamp,
-      numeroPersone: numeroPersone,
-      telefonoCliente: m['telefonoCliente'],
-      nomeCliente: m['nomeCliente'],
-      accumulaPunti: accumulaPunti,
-      statoComplessivo: statoComplessivo,
-      totale: totale,
+      idCameriere: idCameriere,
+      note: note,
     );
   }
 }

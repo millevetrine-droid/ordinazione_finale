@@ -5,9 +5,9 @@ import 'package:ordinazione/core/repositories/menu_repository.dart';
 void main() {
   test('MenuRepositoryFirestore reads from FakeFirebaseFirestore', () async {
     final fake = FakeFirebaseFirestore();
-    // seed fake collection
-    await fake.collection('macrocategorie').add({'nome': 'Antipasti'});
-    await fake.collection('macrocategorie').add({'nome': 'Primi'});
+  // seed fake collection in the same path used by MenuRepository
+  await fake.collection('ristoranti').doc('mille_vetrine').collection('macrocategorie').add({'nome': 'Antipasti'});
+  await fake.collection('ristoranti').doc('mille_vetrine').collection('macrocategorie').add({'nome': 'Primi'});
 
     final repo = MenuRepositoryFirestore(firestore: fake);
     final cats = await repo.fetchMacrocategorie();

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 // ✅ CORRETTO PERCORSO
 // ✅ CORRETTO PERCORSO
-import '../../../features/home/widgets/bottom_nav_bar.dart'; // ✅ CORRETTO PERCORSO
-import '../visualizza_cucina_screen.dart';
-import '../cameriere_ordine_manuale_screen.dart';
+import 'package:ordinazione/features/home/widgets/bottom_nav_bar.dart'; // ✅ CORRETTO PERCORSO
+import 'package:ordinazione/presentation/pages/visualizza_cucina_screen.dart';
+import 'package:ordinazione/presentation/pages/cameriere_ordine_manuale_screen.dart';
 import 'widgets/tab_pietanze_pronte.dart';
 import 'widgets/tab_archivio_sala.dart';
 

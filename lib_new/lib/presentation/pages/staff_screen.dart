@@ -38,11 +38,11 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/providers/auth_provider.dart';
-import '../../core/providers/ordini_provider.dart';
-import '../../core/models/ordine_model.dart';
-import '../../core/models/pietanza_model.dart'; // ✅ AGGIUNTO per referenza diretta
-import '../../features/home/widgets/bottom_nav_bar.dart';
+import 'package:ordinazione/core/providers/auth_provider.dart';
+import 'package:ordinazione/core/providers/ordini_provider.dart';
+import 'package:ordinazione/core/models/ordine_model.dart';
+import 'package:ordinazione/core/models/pietanza_model.dart'; // ✅ AGGIUNTO per referenza diretta
+import 'package:ordinazione/features/home/widgets/bottom_nav_bar.dart';
 import 'cucina/widgets/ordine_card.dart';
 
 // === CLASSE: STAFF SCREEN ===

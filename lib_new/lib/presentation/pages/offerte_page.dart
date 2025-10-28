@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ordinazione/utils/color_utils.dart';
-import 'package:ordinazione/services/firebase/menu_service.dart' as MenuServiceLegacy;
-import '../widgets/offerta_card.dart' as offerta_widgets;
+import 'package:ordinazione/core/services/menu_services/menu_service.dart';
+import 'package:ordinazione/presentation/widgets/offerta_card.dart' as offerta_widgets;
 
 class OffertePage extends StatelessWidget {
   const OffertePage({super.key});
@@ -57,7 +57,7 @@ class OffertePage extends StatelessWidget {
               // Lista offerte (caricata da MenuService)
               Expanded(
                 child: FutureBuilder<List<Map<String, dynamic>>>(
-                  future: MenuServiceLegacy.MenuService.getOfferteStatic(),
+                  future: MenuService.getOfferteStatic(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());

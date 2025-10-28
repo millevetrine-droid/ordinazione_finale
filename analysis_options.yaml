@@ -33,6 +33,10 @@ analyzer:
     - "lib_merged_20251020_195306/flutter/**"
     - "lib_merged_20251020_195306/**/flutter/**"
     - "backups/**"
+    - "lib_backup_pre_merge_*/**"
+    - "lib_backup_before_run_*/**"
+    - "lib_backup_*/**"
+    - "lib_merged_*/**"
     - "build/**"
 
 # Additional information about this file can be found at

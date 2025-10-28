@@ -35,8 +35,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/providers/ordini_provider.dart';
-import '../../core/models/ordine_model.dart';
+import 'package:ordinazione/core/providers/ordini_provider.dart';
+import 'package:ordinazione/core/models/ordine_model.dart';
 // ✅ AGGIUNTO per referenza diretta
 
 // === CLASSE: ARCHIVIO SCREEN ===

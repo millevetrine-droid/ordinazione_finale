@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "pietanze",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "disponibile", "order": "ASCENDING" },
+        { "fieldPath": "nome", "order": "ASCENDING" },
+        { "fieldPath": "__name__", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

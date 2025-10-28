@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 // ✅ CORRETTO PERCORSO
 import 'widgets/tab_ordini_attivi.dart';
 import 'widgets/tab_archivio_recuperi.dart';
-import '../../../features/home/widgets/bottom_nav_bar.dart'; // ✅ CORRETTO PERCORSO
+import 'package:ordinazione/features/home/widgets/bottom_nav_bar.dart'; // ✅ CORRETTO PERCORSO
 
 class CucinaScreen extends StatefulWidget {
   const CucinaScreen({super.key});

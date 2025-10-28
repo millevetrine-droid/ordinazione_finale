@@ -27,48 +27,55 @@ class PietanzaAdapter {
 
     // Prefer explicit categoriaId from new model; fall back to macrocategoriaId
     final categoriaId = (m['categoriaId'] ?? m['macrocategoriaId'] ?? '') as String;
-    final categoria = (m['macrocategoriaId'] ?? m['categoria'] ?? categoriaId ?? '') as String;
-
-    // imageUrl is the new common field name; immagine is used in current project
-    final imageUrl = (m['imageUrl'] ?? m['immagine']) as String?;
-    final immagine = imageUrl ?? '';
+    // imageUrl is the new common field name; legacy field may be 'immagine' or 'emoji'
+    final imageUrl = m['imageUrl'] as String?;
+    final emojiField = (m['emoji'] ?? m['immagine']) as String?;
 
     // ordine may be absent in the new model; default to 0
-    final ordine = (m['ordine'] is int) ? m['ordine'] as int : (m['ordine'] is num ? (m['ordine'] as num).toInt() : 0);
+    final ordine = (m['ordine'] is int)
+        ? m['ordine'] as int
+        : (m['ordine'] is num ? (m['ordine'] as num).toInt() : 0);
 
-    final usaFoto = (m['usaFoto'] is bool) ? m['usaFoto'] as bool : (imageUrl != null && imageUrl.isNotEmpty);
-    final fotoUrl = imageUrl;
+    // legacy 'categoria' variable is not used after migration to categoriaId/macrocategoriaId
 
-    // New model may have allergeni as List<String>. Map to a single String for
-    // backward compatible local model (comma separated). If allergeni is already
-    // a String, keep it.
-    String? allergeni;
+    // New model may have allergeni as List<String> or as comma string. Normalize to List<String>
     final rawAll = m['allergeni'];
+    final List<String> allergeniList = [];
     if (rawAll is String) {
-      allergeni = rawAll;
-    } else if (rawAll is Iterable) {
-      try {
-        allergeni = rawAll.map((e) => e?.toString() ?? '').where((s) => s.isNotEmpty).join(', ');
-        if (allergeni.isEmpty) allergeni = null;
-      } catch (_) {
-        allergeni = null;
+      for (final s in rawAll.split(',')) {
+        final t = s.trim();
+        if (t.isNotEmpty) allergeniList.add(t);
       }
-    } else {
-      allergeni = null;
+    } else if (rawAll is Iterable) {
+      for (final e in rawAll) {
+        final s = e?.toString();
+        if (s != null && s.isNotEmpty) allergeniList.add(s);
+      }
     }
 
     return Pietanza(
       id: id,
       nome: nome,
-      prezzo: prezzo,
-      categoria: categoria,
-      categoriaId: categoriaId,
       descrizione: descrizione,
-      immagine: immagine,
+      prezzo: prezzo,
+      emoji: emojiField,
+      imageUrl: imageUrl,
+      ingredienti: (() {
+        final List<String> list = [];
+        final raw = m['ingredienti'];
+        if (raw is Iterable) {
+          for (final e in raw) {
+            final s = e?.toString();
+            if (s != null && s.isNotEmpty) list.add(s);
+          }
+        }
+        return list;
+      })(),
+    allergeni: allergeniList,
+    disponibile: m['disponibile'] ?? true,
+      categoriaId: categoriaId,
+      macrocategoriaId: (m['macrocategoriaId'] ?? categoriaId) as String,
       ordine: ordine,
-      usaFoto: usaFoto,
-      fotoUrl: fotoUrl,
-      allergeni: allergeni,
     );
   }
 
@@ -80,13 +87,13 @@ class PietanzaAdapter {
       'nome': p.nome,
       'prezzo': p.prezzo,
       'descrizione': p.descrizione,
-      'imageUrl': p.fotoUrl ?? (p.immagine.isNotEmpty ? p.immagine : null),
-      'ingredienti': [], // adapter can't infer ingredients; leave empty by default
-      'allergeni': p.allergeni != null ? p.allergeni!.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList() : [],
-      'disponibile': true,
-      'stato': 0,
+      'imageUrl': p.imageUrl ?? (p.emoji != null && p.emoji!.isNotEmpty ? p.emoji : null),
+      'ingredienti': p.ingredienti,
+      'allergeni': p.allergeni,
+      'disponibile': p.disponibile,
+      'stato': p.stato.index,
       'categoriaId': p.categoriaId,
-      'macrocategoriaId': p.categoria,
+      'macrocategoriaId': p.macrocategoriaId,
     };
   }
 }

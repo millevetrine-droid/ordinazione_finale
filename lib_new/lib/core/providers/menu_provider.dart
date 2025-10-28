@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
-import '../repositories/menu_repository.dart';
-import '../models/macrocategoria_model.dart';
-import '../models/categoria_model.dart';
-import '../models/pietanza_model.dart';
+import 'package:ordinazione/core/repositories/menu_repository.dart';
+import 'package:ordinazione/core/models/macrocategoria_model.dart';
+import 'package:ordinazione/core/models/categoria_model.dart';
+import 'package:ordinazione/core/models/pietanza_model.dart';
 
 class MenuProvider with ChangeNotifier {
   final MenuRepository _menuRepository;

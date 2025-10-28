@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:developer' as dev;
-import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'firebase_options.dart';
-import 'screens/splash_screen.dart';
+import 'package:firebase_core/firebase_core.dart' as fb_core;
+import 'features/splash/splash_screen.dart';
 import 'features/home/home_screen.dart';
 import 'presentation/pages/menu_screen.dart';
 import 'presentation/pages/login_screen.dart';
@@ -11,7 +9,7 @@ import 'presentation/pages/qr_scanner_page.dart';
 import 'presentation/pages/cucina/cucina_screen.dart';
 import 'presentation/pages/sala/sala_screen.dart';
 import 'presentation/pages/proprietario_screen.dart';
-import 'presentation/pages/staff_screen.dart';
+import 'presentation/pages/staff_screen.dart'; // ✅ AGGIUNTO
 import 'presentation/pages/archivio_screen.dart';
 import 'presentation/pages/statistiche_screen.dart';
 import 'core/providers/cart_provider.dart';
@@ -20,21 +18,25 @@ import 'core/providers/ordini_provider.dart';
 import 'core/providers/auth_provider.dart';
 import 'core/providers/session_provider.dart';
 import 'core/repositories/menu_repository.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('ENTRYPOINT: lib_new main() starting at ' + DateTime.now().toIso8601String());
   
+  // Only initialize Firebase here if it hasn't already been initialized by
+  // the delegating entrypoint. This avoids races and double-initialization
+  // when the app is launched via the `lib/main.dart` delegator.
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    dev.log('✅ Firebase inizializzato correttamente', name: 'main');
+    if (fb_core.Firebase.apps.isEmpty) {
+      await fb_core.Firebase.initializeApp();
+      debugPrint("✅ Firebase inizializzato con successo (lib_new main)!");
+    } else {
+      debugPrint("⚠️ Firebase already initialized (lib_new main), skipping init.");
+    }
   } catch (e) {
-    dev.log('❌ Errore inizializzazione Firebase: $e', name: 'main');
-    // L'app continua comunque senza Firebase
+    debugPrint("❌ Errore inizializzazione Firebase (lib_new main): $e");
   }
   
   runApp(const MyApp());
@@ -47,16 +49,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<MenuRepository>(
-          create: (_) {
-            try {
-              return MenuRepositoryFirestore(firestore: FirebaseFirestore.instance);
-            } catch (_) {
-              // If Firestore isn't available, fall back to the in-memory repo.
-              return MenuRepository();
-            }
-          },
-        ),
+        Provider<MenuRepository>(create: (_) => MenuRepository()),
         ChangeNotifierProvider<MenuProvider>(
           create: (context) => MenuProvider(context.read<MenuRepository>()),
         ),
@@ -88,7 +81,7 @@ class MyApp extends StatelessWidget {
           '/cucina': (context) => const CucinaScreen(),
           '/sala': (context) => const SalaScreen(),
           '/proprietario': (context) => const ProprietarioScreen(),
-          '/staff': (context) => const StaffScreen(),
+          '/staff': (context) => const StaffScreen(), // ✅ AGGIUNTO
           '/archivio': (context) => const ArchivioScreen(),
           '/statistiche': (context) => const StatisticheScreen(),
         },

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/firebase_service.dart';
 import '../models/cliente_model.dart';
 import '../models/regalo_punti_model.dart';
-import 'regalo_punti_screen.dart';
+import 'package:ordinazione/presentation/pages/regalo_punti_screen.dart';
 
 class ProfiloClienteScreen extends StatefulWidget {
   final String telefonoCliente;
@@ -28,10 +28,12 @@ class _ProfiloClienteScreenState extends State<ProfiloClienteScreen> {
 
   void _caricaProfiloCliente() async {
     try {
-      final cliente = await FirebaseService.clientAuth.getClienteByTelefono(widget.telefonoCliente);
+      final clienteMap = await FirebaseService().clientAuth.getClienteByTelefono(widget.telefonoCliente);
       if (!mounted) return;
       setState(() {
-        _cliente = cliente;
+        _cliente = clienteMap != null
+            ? Cliente.fromMap(clienteMap, clienteMap['id'] as String? ?? '')
+            : null;
         _isLoading = false;
       });
     } catch (e) {
@@ -276,7 +278,7 @@ class _ProfiloClienteScreenState extends State<ProfiloClienteScreen> {
                   ),
                   const SizedBox(height: 12),
                   StreamBuilder<List<RegaloPunti>>(
-                    stream: FirebaseService.points.getRegaliInviati(widget.telefonoCliente).map((list) => list.map((item) => RegaloPunti.fromMap({'id': item['id'], ...item})).toList()),
+                    stream: FirebaseService().points.getRegaliInviati(widget.telefonoCliente).map((list) => list.map((item) => RegaloPunti.fromMap({'id': item['id'], ...item})).toList()),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
@@ -328,7 +330,7 @@ class _ProfiloClienteScreenState extends State<ProfiloClienteScreen> {
                   ),
                   const SizedBox(height: 12),
                   StreamBuilder<List<RegaloPunti>>(
-                    stream: FirebaseService.points.getRegaliRicevuti(widget.telefonoCliente).map((list) => list.map((item) => RegaloPunti.fromMap({'id': item['id'], ...item})).toList()),
+                    stream: FirebaseService().points.getRegaliRicevuti(widget.telefonoCliente).map((list) => list.map((item) => RegaloPunti.fromMap({'id': item['id'], ...item})).toList()),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());

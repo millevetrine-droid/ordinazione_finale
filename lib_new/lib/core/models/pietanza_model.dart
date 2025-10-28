@@ -131,17 +131,34 @@ class Pietanza {
   /// Utilizzo: Dal database o localStorage per ricreare l'oggetto
   /// Note: Gestisce i casi di campi mancanti con valori di default
   factory Pietanza.fromMap(Map<String, dynamic> map) {
+    // Compatibility: accept multiple field names and enum formats
+    final rawStato = map['stato'] ?? map['statoPietanza'];
+    StatoPietanza parsedStato;
+    if (rawStato is int) {
+      parsedStato = StatoPietanza.values[(rawStato < StatoPietanza.values.length) ? rawStato : 0];
+    } else if (rawStato is String) {
+      parsedStato = StatoPietanza.values.firstWhere(
+        (e) => e.toString().split('.').last == rawStato || e.toString() == rawStato,
+        orElse: () => StatoPietanza.inAttesa,
+      );
+    } else {
+      parsedStato = StatoPietanza.inAttesa;
+    }
+
+    // image field compatibility: imageUrl, immagine, fotoUrl
+    final image = map['imageUrl'] ?? map['immagine'] ?? map['fotoUrl'];
+
     return Pietanza(
       id: map['id'] ?? '',
       nome: map['nome'] ?? '',
       descrizione: map['descrizione'] ?? '',
       prezzo: (map['prezzo'] ?? 0.0).toDouble(),
       emoji: map['emoji'],
-      imageUrl: map['imageUrl'],
+      imageUrl: image,
       ingredienti: List<String>.from(map['ingredienti'] ?? []),
       allergeni: List<String>.from(map['allergeni'] ?? []), // ✅ NUOVO: deserializza allergeni
       disponibile: map['disponibile'] ?? true,
-      stato: StatoPietanza.values[map['stato'] ?? 0],
+      stato: parsedStato,
       categoriaId: map['categoriaId'],
       macrocategoriaId: map['macrocategoriaId'] ?? '',
     );

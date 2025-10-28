@@ -11,9 +11,9 @@ library;
 
 import 'dart:async'; // ✅ AGGIUNTO PER StreamSubscription
 import 'package:flutter/foundation.dart';
-import '../models/ordine_model.dart';
-import '../models/pietanza_model.dart';
-import '../services/firebase_service.dart';
+import 'package:ordinazione/core/models/ordine_model.dart';
+import 'package:ordinazione/core/models/pietanza_model.dart';
+import 'package:ordinazione/core/services/firebase_service.dart';
 
 class OrdiniProvider with ChangeNotifier {
   final List<Ordine> _ordiniLocali = []; // Backup per offline

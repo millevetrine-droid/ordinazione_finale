@@ -31,16 +31,16 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/providers/menu_provider.dart';
-import '../../core/providers/cart_provider.dart';
-import '../../core/providers/session_provider.dart';
-import '../../core/models/categoria_model.dart';
-import '../../core/models/macrocategoria_model.dart';
-import '../widgets/empty_state.dart';
-import '../widgets/compact_cart_bar.dart';
-import '../widgets/checkout_dialog.dart';
-import '../../features/home/dialogs/selezione_tavolo_dialog.dart';
-import '../widgets/cart/cart_detailed_view.dart';
+import 'package:ordinazione/core/providers/menu_provider.dart';
+import 'package:ordinazione/core/providers/cart_provider.dart';
+import 'package:ordinazione/core/providers/session_provider.dart';
+import 'package:ordinazione/core/models/categoria_model.dart';
+import 'package:ordinazione/core/models/macrocategoria_model.dart';
+import 'package:ordinazione/presentation/widgets/empty_state.dart';
+import 'package:ordinazione/presentation/widgets/compact_cart_bar.dart';
+import 'package:ordinazione/presentation/widgets/checkout_dialog.dart';
+import 'package:ordinazione/features/home/dialogs/selezione_tavolo_dialog.dart';
+import 'package:ordinazione/presentation/widgets/cart/cart_detailed_view.dart';
 import 'category_items_screen.dart';
 
 class MenuScreen extends StatefulWidget {

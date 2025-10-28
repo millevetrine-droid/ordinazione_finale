@@ -89,20 +89,58 @@ class Ordine {
 
   // ✅ FACTORY AGGIORNATO CON STORICO
   factory Ordine.fromMap(Map<String, dynamic> map) {
+    // compatibility: accept legacy field names and multiple timestamp/enum formats
+    dynamic rawTimestamp = map['timestamp'] ?? map['data'] ?? map['time'];
+    DateTime parsedTimestamp;
+    if (rawTimestamp is DateTime) {
+      parsedTimestamp = rawTimestamp;
+    } else if (rawTimestamp is Timestamp) {
+      parsedTimestamp = rawTimestamp.toDate();
+    } else if (rawTimestamp is String) {
+      parsedTimestamp = DateTime.tryParse(rawTimestamp) ?? DateTime.now();
+    } else if (rawTimestamp is int) {
+      parsedTimestamp = DateTime.fromMillisecondsSinceEpoch(rawTimestamp);
+    } else {
+      parsedTimestamp = DateTime.now();
+    }
+
+    // stato: accept int (index) or string name
+    dynamic rawStato = map['stato'] ?? map['statoComplessivo'] ?? 0;
+    StatoOrdine parsedStato;
+    if (rawStato is int) {
+      parsedStato = StatoOrdine.values[(rawStato < StatoOrdine.values.length) ? rawStato : 0];
+    } else if (rawStato is String) {
+      parsedStato = StatoOrdine.values.firstWhere(
+        (e) => e.toString().split('.').last == rawStato || e.toString() == rawStato,
+        orElse: () => StatoOrdine.inAttesa,
+      );
+    } else {
+      parsedStato = StatoOrdine.inAttesa;
+    }
+
+    final pietanzeList = (map['pietanze'] as List? ?? []).map((p) => Pietanza.fromMap(Map<String, dynamic>.from(p))).toList();
+
+    final storico = (map['storicoStati'] as List? ?? []).map((s) {
+      final fromRaw = s['fromStato'];
+      final toRaw = s['toStato'];
+      StatoOrdine from = (fromRaw is int) ? StatoOrdine.values[fromRaw] : (fromRaw is String ? StatoOrdine.values.firstWhere((e)=>e.toString().split('.').last==fromRaw, orElse: ()=>StatoOrdine.inAttesa) : StatoOrdine.inAttesa);
+      StatoOrdine to = (toRaw is int) ? StatoOrdine.values[toRaw] : (toRaw is String ? StatoOrdine.values.firstWhere((e)=>e.toString().split('.').last==toRaw, orElse: ()=>StatoOrdine.inAttesa) : StatoOrdine.inAttesa);
+      // parse timestamp in same tolerant way
+      dynamic sTs = s['timestamp'];
+      DateTime sParsed;
+      if (sTs is Timestamp) sParsed = sTs.toDate(); else if (sTs is String) sParsed = DateTime.tryParse(sTs) ?? DateTime.now(); else if (sTs is int) sParsed = DateTime.fromMillisecondsSinceEpoch(sTs); else if (sTs is DateTime) sParsed = sTs; else sParsed = DateTime.now();
+      return StatoChange(fromStato: from, toStato: to, timestamp: sParsed, user: s['user'] ?? '');
+    }).toList();
+
     return Ordine(
       id: map['id'] ?? '',
-      numeroTavolo: map['numeroTavolo'] ?? '',
-      pietanze: (map['pietanze'] as List).map((p) => Pietanza.fromMap(p)).toList(),
-      stato: StatoOrdine.values[map['stato'] ?? 0],
-      timestamp: DateTime.parse(map['timestamp']),
-      idCameriere: map['idCameriere'] ?? '',
+      numeroTavolo: map['numeroTavolo'] ?? map['tavolo'] ?? '',
+      pietanze: pietanzeList,
+      stato: parsedStato,
+      timestamp: parsedTimestamp,
+      idCameriere: map['idCameriere'] ?? map['cameriereId'] ?? '',
       note: map['note'] ?? '',
-      storicoStati: (map['storicoStati'] as List? ?? []).map((s) => StatoChange(
-        fromStato: StatoOrdine.values[s['fromStato']],
-        toStato: StatoOrdine.values[s['toStato']],
-        timestamp: DateTime.parse(s['timestamp']),
-        user: s['user'],
-      )).toList(), // ✅ NUOVO: deserializzazione storico
+      storicoStati: storico,
     );
   }
 

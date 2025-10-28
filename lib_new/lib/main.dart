@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_core/firebase_core.dart' as fb_core;
 import 'features/splash/splash_screen.dart';
 import 'features/home/home_screen.dart';
 import 'presentation/pages/menu_screen.dart';
@@ -23,12 +23,20 @@ final navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('ENTRYPOINT: lib_new main() starting at ' + DateTime.now().toIso8601String());
   
+  // Only initialize Firebase here if it hasn't already been initialized by
+  // the delegating entrypoint. This avoids races and double-initialization
+  // when the app is launched via the `lib/main.dart` delegator.
   try {
-    await Firebase.initializeApp();
-  debugPrint("✅ Firebase inizializzato con successo!");
+    if (fb_core.Firebase.apps.isEmpty) {
+      await fb_core.Firebase.initializeApp();
+      debugPrint("✅ Firebase inizializzato con successo (lib_new main)!");
+    } else {
+      debugPrint("⚠️ Firebase already initialized (lib_new main), skipping init.");
+    }
   } catch (e) {
-  debugPrint("❌ Errore inizializzazione Firebase: $e");
+    debugPrint("❌ Errore inizializzazione Firebase (lib_new main): $e");
   }
   
   runApp(const MyApp());

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../models/pietanza_model.dart';
+import 'package:ordinazione/core/models/pietanza_model.dart';
 
 class CartItem {
   final Pietanza pietanza;

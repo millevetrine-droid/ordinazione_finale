@@ -32,8 +32,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/providers/ordini_provider.dart';
-import '../../core/providers/menu_provider.dart';
+import 'package:ordinazione/core/providers/ordini_provider.dart';
+import 'package:ordinazione/core/providers/menu_provider.dart';
 
 // === CLASSE: STATISTICHE SCREEN ===
 // Scopo: Schermata stateless per visualizzazione statistiche

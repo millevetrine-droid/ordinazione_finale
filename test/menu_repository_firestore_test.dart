@@ -7,12 +7,12 @@ class TestMenuRepository extends MenuRepository {
   TestMenuRepository({required this.docs});
 
   @override
-  Future<List<Categoria>> fetchMacrocategorie() async {
+  Future<List<Macrocategoria>> fetchMacrocategorie() async {
     await Future.delayed(const Duration(milliseconds: 10));
     return docs
         .asMap()
         .entries
-        .map((e) => Categoria(id: '${e.key}', nome: e.value['nome'] as String))
+        .map((e) => Macrocategoria(id: '${e.key}', nome: e.value['nome'] as String, ordine: 0))
         .toList(growable: false);
   }
 }

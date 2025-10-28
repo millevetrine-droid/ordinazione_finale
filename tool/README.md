@@ -13,6 +13,11 @@ Installazione e uso (PowerShell):
 # Poi, nella root del progetto esegui:
 npm install firebase-admin; $env:FIRESTORE_EMULATOR_HOST='localhost:8080'; $env:FIREBASE_PROJECT_ID='demo-project'; node .\tool\seed_firestore.js
 
+Oppure esegui lo script PowerShell di helper (verifica e lancia automaticamente):
+.
+	.\tool\seed_emulator.ps1
+
+
 # Opzione B - Seed verso Firestore REALE (usa con cautela)
 # 1) Scarica la Service Account JSON dalla Firebase Console e salvala come tool/serviceAccountKey.json
 # 2) Esegui (PowerShell):

@@ -8,6 +8,9 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// (No direct-apply workaround here) The Flutter Gradle plugin is provided by the
+// included-build configured in android/settings.gradle.kts (recommended).
+
 android {
     namespace = "com.example.ordinazione"
     compileSdk = flutter.compileSdkVersion
@@ -41,7 +44,6 @@ android {
         }
     }
 }
-
 flutter {
     source = "../.."
 }

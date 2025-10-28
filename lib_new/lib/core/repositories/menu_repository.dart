@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/macrocategoria_model.dart';
-import '../models/categoria_model.dart';
-import '../models/pietanza_model.dart';
+import 'package:ordinazione/core/services/firebase_service.dart' as core_fb;
+import 'package:ordinazione/models/macrocategoria_model.dart';
+import 'package:ordinazione/models/categoria_model.dart';
+import 'package:ordinazione/models/pietanza_model.dart';
 
 class MenuRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  // Defer obtaining the Firestore instance until first use to avoid
+  // initialization-order issues when the app entrypoint initializes Firebase.
+  FirebaseFirestore get _firestore => core_fb.FirebaseService().firestore;
 
   // Riferimenti alle collezioni
   CollectionReference get _macrocategorieCollection => 

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ordinazione/presentation/pages/profilo_cliente_screen.dart';
+import 'package:ordinazione/presentation/pages/enter_phone_screen.dart';
 
 class HomeHeader extends StatelessWidget {
   final String? userName;
@@ -33,11 +35,30 @@ class HomeHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 5),
-        Text(
-          'Benvenuto, ${userName ?? 'Cliente'}',
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 16,
+        // Row with welcome text and a profile button that opens the customer profile
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Benvenuto, ${userName ?? 'Cliente'}',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Apri profilo cliente',
+                icon: const Icon(Icons.person_outline, color: Colors.white70),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const EnterPhoneScreen()),
+                  );
+                },
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 10),

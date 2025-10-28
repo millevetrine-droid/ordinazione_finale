@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/providers/auth_provider.dart';
-import '../../features/home/widgets/bottom_nav_bar.dart';
+import 'package:ordinazione/core/providers/auth_provider.dart';
+import 'package:ordinazione/features/home/widgets/bottom_nav_bar.dart';
 import 'cucina/cucina_screen.dart'; // ✅ CORRETTO PERCORSO
 import 'sala/sala_screen.dart';
 import 'proprietario_screen.dart';
+import 'reset_password_request_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -177,7 +178,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       style: const TextStyle(color: Colors.white),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
+
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const ResetPasswordRequestScreen()),
+                          );
+                        },
+                        child: const Text(
+                          'Non ricordo la password',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
 
                     if (_isLoading)
                       const CircularProgressIndicator(

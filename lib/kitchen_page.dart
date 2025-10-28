@@ -1,8 +1,8 @@
 // lib/kitchen_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:ordinazione_finale/database_service.dart';
-import 'package:ordinazione_finale/models/order.dart';
+import 'package:ordinazione/database_service.dart';
+import 'package:ordinazione/models/order.dart';
 
 class KitchenPage extends StatefulWidget {
   const KitchenPage({super.key});

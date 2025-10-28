@@ -1,7 +1,8 @@
 // lib/database_service.dart
 
 import 'dart:async';
-import 'package:ordinazione_finale/models/order.dart';
+import 'package:ordinazione/models/order.dart';
+import 'package:ordinazione/models/item.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
@@ -18,26 +19,26 @@ class DatabaseService {
       id: 1,
       tableNumber: 5,
       items: [
-        OrderItem(itemName: 'Pizza Margherita', itemStatus: 'In preparazione'),
-        OrderItem(itemName: 'Coca-Cola', itemStatus: 'In preparazione'),
+        Item(itemName: 'Pizza Margherita', price: 7.5, itemStatus: ItemStatus.inPreparation),
+        Item(itemName: 'Coca-Cola', price: 2.5, itemStatus: ItemStatus.inPreparation),
       ],
-      status: 'In preparazione',
+      status: ItemStatus.inPreparation,
     ),
     Order(
       id: 2,
       tableNumber: 5,
       items: [
-        OrderItem(itemName: 'Tiramisù', itemStatus: 'In preparazione'),
+        Item(itemName: 'Tiramisù', price: 4.0, itemStatus: ItemStatus.inPreparation),
       ],
-      status: 'In preparazione',
+      status: ItemStatus.inPreparation,
     ),
     Order(
       id: 3,
       tableNumber: 8,
       items: [
-        OrderItem(itemName: 'Spaghetti allo scoglio', itemStatus: 'In preparazione'),
+        Item(itemName: 'Spaghetti allo scoglio', price: 9.0, itemStatus: ItemStatus.inPreparation),
       ],
-      status: 'In preparazione',
+      status: ItemStatus.inPreparation,
     ),
   ];
 
@@ -75,15 +76,15 @@ class DatabaseService {
     try {
       final order = _allOrders.firstWhere((o) => o.id == orderId);
       final item = order.items.firstWhere((i) => i.itemName == itemName);
-      item.itemStatus = 'In consegna';
+      item.itemStatus = ItemStatus.ready;
       
-      // Aggiungiamo il nuovo oggetto ReadyItemForDelivery alla lista
-      _readyForDeliveryItems.add(ReadyItemForDelivery(item: item, tableNumber: order.tableNumber));
+  // Aggiungiamo il nuovo oggetto ReadyItemForDelivery alla lista
+  _readyForDeliveryItems.add(ReadyItemForDelivery(orderId: order.id, item: item, tableNumber: order.tableNumber));
       
       // Controlla se tutti gli elementi dell'ordine sono pronti. Se lo sono, sposta l'ordine nell'archivio della cucina.
-      final allItemsReady = order.items.every((item) => item.itemStatus == 'In consegna');
+      final allItemsReady = order.items.every((item) => item.itemStatus == ItemStatus.ready);
       if (allItemsReady) {
-        order.status = 'In consegna';
+        order.status = ItemStatus.ready;
         _allOrders.removeWhere((o) => o.id == order.id);
         _kitchenArchive.add(order);
       }
@@ -119,8 +120,8 @@ class DatabaseService {
     }
 
     if (orderToRestore != null) {
-      // Aggiorna lo stato dell'ordine a 'In preparazione'
-      orderToRestore.status = 'In preparazione';
+  // Aggiorna lo stato dell'ordine a 'In preparazione'
+  orderToRestore.status = ItemStatus.inPreparation;
       _allOrders.add(orderToRestore);
     } else {
       print('Ordine archiviato non trovato: $orderId');
@@ -139,5 +140,12 @@ class DatabaseService {
     } catch (e) {
       print('Ordine non trovato: $e');
     }
+  }
+
+  // Aggiunge un nuovo ordine (usato dalla UI di registrazione cliente)
+  Future<void> addOrder(Order order) async {
+    // simulate latency
+    await Future.delayed(const Duration(milliseconds: 200));
+    _allOrders.add(order);
   }
 }

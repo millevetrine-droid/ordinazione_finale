@@ -17,6 +17,13 @@ jobs:
           fetch-depth: 0
           submodules: false
 
+      - name: Ensure .gitmodules has lib/flutter entry
+        run: |
+          set -e
+          if [ ! -f .gitmodules ] || ! grep -q 'path = lib/flutter' .gitmodules; then
+            printf '[submodule "lib/flutter"]\n\tpath = lib/flutter\n\turl = https://github.com/flutter/flutter.git\n' > .gitmodules
+          fi
+
       - name: Install Flutter (clone stable)
         run: |
           set -e

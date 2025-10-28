@@ -17,11 +17,30 @@ jobs:
           fetch-depth: 0
           submodules: false
 
-      - name: Ensure .gitmodules is empty
+      - name: Populate .gitmodules for runner cleanup
         run: |
           set -e
-          # Truncate .gitmodules so git submodule foreach doesn't fail during cleanup
+          # Some branches/history in this repo contain folders that look like submodules
+          # (e.g. .../flutter). The checkout action runs `git submodule foreach` during
+          # post-job cleanup which fails if .gitmodules lacks URLs for those paths.
+          # Create a safe .gitmodules listing any 'flutter' directories found so cleanup
+          # will not error. Use a harmless placeholder URL.
           : > .gitmodules
+          echo "Scanning for 'flutter' directories to populate .gitmodules..."
+          # Find directories named 'flutter' (exclude the cloned $HOME/flutter SDK)
+          find . -type d -name flutter -print0 \
+            | while IFS= read -r -d '' d; do
+                # normalize path (remove leading ./)
+                p="${d#./}"
+                # skip the Flutter SDK if somehow present under HOME
+                if [ "${p#home/runner/work}" != "${p}" ]; then
+                  # ignore runner-local HOME flutter paths
+                  continue
+                fi
+                echo "[submodule \"$p\"]" >> .gitmodules
+                echo "  path = $p" >> .gitmodules
+                echo "  url = https://example.com/dummy.git" >> .gitmodules
+              done || true
 
       - name: Install Flutter (clone stable)
         run: |

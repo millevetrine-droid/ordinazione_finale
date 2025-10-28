@@ -1,6 +1,6 @@
 {
-    "name": "ordinazione_finale",
-    "short_name": "ordinazione_finale",
+    "name": "ordinazione",
+    "short_name": "ordinazione",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -32,11 +32,14 @@ analyzer:
   exclude:
     - "**/lib_backup_pre_merge_*/**"
     - "**/lib_merged_*/**"
-    - "**/backups/**"
-    - "**/build/**"
-    - "**/coverage/**"
+    - "lib_backup_before_run_*/**"
+    - "lib_backup_*/**"
+    - "backups/**"
+    - "build/**"
+    - "coverage/**"
     - "**/.dart_tool/**"
     - "**/.pub-cache/**"
+    - "**/flutter/**"
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

@@ -85,4 +85,58 @@ dart run tool\migra_color_offerte.dart --sample 10
 dart run tool\migra_color_offerte.dart
 ```
 
+## Nota sulla migrazione `lib_new` (baseline) 🛠️
+
+Stato attuale della migrazione:
+
+- `lib_new/` è la baseline canonica del codice. Le nuove implementazioni per
+	Points e Offerte sono state consolidate sotto `lib_new/lib/core/services`.
+- Per mantenere compatibilità con il codice legacy, sono presenti degli shim e
+	adapter nella cartella `lib/` che delegano alle implementazioni in `lib_new`.
+
+Dove guardare (file rilevanti):
+
+- Implementazioni canonicali:
+	- `lib_new/lib/core/services/point_service.dart` (PointsService)
+	- `lib_new/lib/core/services/menu_services/menu_firestore_service.dart` (Offerte)
+	- `lib_new/lib/presentation/pages/regalo_punti_screen.dart` (UI Regala Punti)
+	- `lib_new/lib/presentation/pages/gestione_offerte_controller.dart` (controller Offerte)
+
+- Shim / adapter legacy:
+	- `lib/services/firebase/points_service.dart` (shim delega a `lib_new`)
+	- `lib/adapters/offerta_adapter.dart` (normalizzazione offerta)
+
+Come lavorare con la baseline `lib_new`:
+
+1. Sviluppa e testa le modifiche dentro `lib_new/`.
+2. Usa gli shim in `lib/` per mantenere retrocompatibilità con import legacy
+	 finché non sei pronto a rimuoverli.
+3. Prima di rimuovere uno shim:
+	 - Assicurati che tutti i riferimenti legacy siano aggiornati.
+	 - Esegui la suite di test (`flutter test`) e `flutter analyze`.
+	 - Crea un backup (`tool/backup_repo.ps1`) e apri una PR con un changelog chiaro.
+
+Comandi utili locali (PowerShell):
+
+```powershell
+# Crea un branch per la merge/migrazione
+git checkout -b feature/migration/lib_new
+
+# Esegui analyzer e test
+C:\src\flutter\flutter\bin\flutter.bat analyze --no-pub
+C:\src\flutter\flutter\bin\flutter.bat test
+
+# Crea commit e push (remote configurato)
+git add -A
+git commit -m "chore(migration): document lib_new baseline and shims; add migration notes"
+git push -u origin feature/migration/lib_new
+```
+
+Note finali:
+
+- Ho già eseguito i test offline per Points/Offerte/Ordini e l'analyzer è "clean"
+	in questa working copy. Se vuoi, preparo una PR draft o procedo con la rimozione
+	degli shim (passo rischioso: lo faccio solo dopo tuo OK).
+
+
 

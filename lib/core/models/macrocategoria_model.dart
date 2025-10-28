@@ -34,13 +34,36 @@ class Macrocategoria {
   }
 
   factory Macrocategoria.fromMap(Map<String, dynamic> map) {
+    int parseOrdine(dynamic v) {
+      if (v == null) return 0;
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      if (v is String) return int.tryParse(v) ?? 0;
+      return 0;
+    }
+
+    String? parseImage(Map<String, dynamic> m) {
+      if (m['imageUrl'] != null) return m['imageUrl'] as String?;
+      if (m['immagine'] != null) return m['immagine'] as String?;
+      if (m['fotoUrl'] != null) return m['fotoUrl'] as String?;
+      if (m['foto'] != null) return m['foto'] as String?;
+      return null;
+    }
+
+    List<String> parseCategorieIds(dynamic v) {
+      if (v == null) return [];
+      if (v is List) return v.map((e) => e?.toString() ?? '').where((s) => s.isNotEmpty).toList();
+      if (v is String) return v.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+      return [];
+    }
+
     return Macrocategoria(
       id: map['id'] ?? '',
       nome: map['nome'] ?? '',
-      emoji: map['emoji'], // ✅ CAMBIATO: non più required
-      imageUrl: map['imageUrl'], // ✅ NUOVO
-      ordine: map['ordine'] ?? 0,
-      categorieIds: List<String>.from(map['categorieIds'] ?? []),
+      emoji: map['emoji'],
+      imageUrl: parseImage(map),
+      ordine: parseOrdine(map['ordine'] ?? map['order']),
+      categorieIds: parseCategorieIds(map['categorieIds'] ?? map['categorie'] ?? []),
     );
   }
 

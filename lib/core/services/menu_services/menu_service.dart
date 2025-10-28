@@ -41,7 +41,7 @@ class MenuService {
         _firestoreService.caricaTuttiIDati().timeout(const Duration(seconds: 10)),
       ], eagerError: true);
 
-      final data = results[0] as Map<String, dynamic>;
+  final data = results[0];
 
       _cache.aggiornaDati(
         pietanze: data['pietanze'] as List<Pietanza>,

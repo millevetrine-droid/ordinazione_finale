@@ -18,10 +18,13 @@ class ColorParser {
 
   /// Convert a [Color] into a hex string '#AARRGGBB'.
   static String colorToHex(Color color) {
-    final a = ((color.alpha) & 0xff).toRadixString(16).padLeft(2, '0');
-    final r = (color.red & 0xff).toRadixString(16).padLeft(2, '0');
-    final g = (color.green & 0xff).toRadixString(16).padLeft(2, '0');
-    final b = (color.blue & 0xff).toRadixString(16).padLeft(2, '0');
+  // Use an explicit ARGB conversion helper (toARGB32) when available
+  // to avoid deprecated channel accessors on Color.
+  final value = color.toARGB32();
+    final a = ((value >> 24) & 0xff).toRadixString(16).padLeft(2, '0');
+    final r = ((value >> 16) & 0xff).toRadixString(16).padLeft(2, '0');
+    final g = ((value >> 8) & 0xff).toRadixString(16).padLeft(2, '0');
+    final b = ((value) & 0xff).toRadixString(16).padLeft(2, '0');
     return '#$a$r$g$b';
   }
 }
@@ -30,6 +33,10 @@ class ColorParser {
 extension ColorUtils on Color {
   Color withOpacitySafe(double opacity) {
     final a = (opacity.clamp(0.0, 1.0) * 255).round();
-    return Color.fromARGB(a, red, green, blue);
+    final v = toARGB32();
+    final r = (v >> 16) & 0xff;
+    final g = (v >> 8) & 0xff;
+    final b = v & 0xff;
+    return Color.fromARGB(a, r, g, b);
   }
 }

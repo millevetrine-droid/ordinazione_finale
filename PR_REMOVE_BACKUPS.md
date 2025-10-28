@@ -1,0 +1,1 @@
+This PR removes tracked backup folders and large artifacts that were accidentally committed (lib_backup_*, lib_merged_*, mylib.zip). These are moved to backups outside the repo. This is a non-destructive cleanup commit; history is preserved. Please review before merging.

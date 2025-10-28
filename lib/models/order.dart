@@ -1,11 +1,12 @@
 // lib/models/order.dart
 
 import 'package:flutter/material.dart';
+import 'package:ordinazione/models/item.dart';
 
 class Order {
   final int id;
   final int tableNumber;
-  final List<OrderItem> items;
+  final List<Item> items;
   String status;
 
   Order({
@@ -16,22 +17,14 @@ class Order {
   });
 }
 
-class OrderItem {
-  final String itemName;
-  String itemStatus;
-
-  OrderItem({
-    required this.itemName,
-    required this.itemStatus,
-  });
-}
-
 // Nuovo modello per i piatti pronti per la consegna
 class ReadyItemForDelivery {
-  final OrderItem item;
+  final int orderId;
+  final Item item;
   final int tableNumber;
 
   ReadyItemForDelivery({
+    required this.orderId,
     required this.item,
     required this.tableNumber,
   });

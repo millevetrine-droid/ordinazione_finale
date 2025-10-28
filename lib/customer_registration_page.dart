@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:ordinazione_finale/database_service.dart';
-import 'package:ordinazione_finale/models/order.dart';
+import 'package:ordinazione/database_service.dart';
+import 'package:ordinazione/models/order.dart';
+import 'package:ordinazione/models/item.dart';
 
 class CustomerRegistrationPage extends StatefulWidget {
-  const CustomerRegistrationPage({super.key});
+  final List<Item>? selectedItems;
+
+  const CustomerRegistrationPage({super.key, this.selectedItems});
 
   @override
   _CustomerRegistrationPageState createState() => _CustomerRegistrationPageState();
@@ -12,7 +15,13 @@ class CustomerRegistrationPage extends StatefulWidget {
 class _CustomerRegistrationPageState extends State<CustomerRegistrationPage> {
   final _formKey = GlobalKey<FormState>();
   final _tableNumberController = TextEditingController();
-  final List<Item> _orderItems = [];
+  late List<Item> _orderItems;
+
+  @override
+  void initState() {
+    super.initState();
+    _orderItems = widget.selectedItems != null ? List.from(widget.selectedItems!) : [];
+  }
 
   void _addOrderItem(String itemName, double price) {
     setState(() {
@@ -33,13 +42,13 @@ class _CustomerRegistrationPageState extends State<CustomerRegistrationPage> {
     if (_formKey.currentState!.validate()) {
       print('Form validato. Creazione oggetto Order...');
       final newOrder = Order(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: DateTime.now().millisecondsSinceEpoch,
         tableNumber: int.parse(_tableNumberController.text),
         items: _orderItems,
-        timestamp: DateTime.now(),
+        status: ItemStatus.inPreparation,
       );
 
-      print('Ordine creato: ${newOrder.toFirestore()}');
+      print('Ordine creato: ${newOrder.id}');
 
       try {
         await DatabaseService().addOrder(newOrder);
@@ -95,7 +104,7 @@ class _CustomerRegistrationPageState extends State<CustomerRegistrationPage> {
                     final item = _orderItems[index];
                     return ListTile(
                       title: Text(item.itemName),
-                      trailing: Text('€${item.price.toStringAsFixed(2)}'),
+                      trailing: Text('€${(item.price ?? 0).toStringAsFixed(2)}'),
                     );
                   },
                 ),

@@ -1,9 +1,10 @@
 // lib/menu_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:ordinazione_finale/menu_service.dart';
-import 'package:ordinazione_finale/models/menu_item.dart';
-import 'package:ordinazione_finale/customer_registration_page.dart';
+import 'package:ordinazione/menu_service.dart';
+import 'package:ordinazione/models/menu_item.dart';
+import 'package:ordinazione/models/item.dart';
+import 'package:ordinazione/customer_registration_page.dart';
 
 class MenuPage extends StatefulWidget {
   final VoidCallback? onStaffLogin;
@@ -41,7 +42,9 @@ class _MenuPageState extends State<MenuPage> {
       context,
       MaterialPageRoute(
         builder: (context) => CustomerRegistrationPage(
-          selectedItems: _selectedItems,
+          selectedItems: _selectedItems
+              .map((m) => Item(itemName: m.name, price: m.price, itemStatus: ItemStatus.inPreparation))
+              .toList(),
         ),
       ),
     ).then((_) {

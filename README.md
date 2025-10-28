@@ -139,7 +139,6 @@ Note finali:
 	degli shim (passo rischioso: lo faccio solo dopo tuo OK).
 
 
-HEAD
 ## Stato merge (28-10-2025)
 
 La migrazione contenuta in `feature/migration/lib_new_on_main` è stata unita
@@ -151,5 +150,5 @@ posso preparare un piano di riscrittura della storia (BFG/git-filter-repo). Ques
 comporta un force-push e coordinazione con i collaboratori; lo eseguo solo dopo
 approvazione esplicita.
 
-feature/migration/lib_new-clean
+
 

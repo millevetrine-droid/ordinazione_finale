@@ -1,0 +1,2 @@
+export 'package:ordinazione/core/models/pietanza_model.dart'; // Re-export the canonical model in lib/core/models so legacy imports
+// using `package:ordinazione/models/...` continue to work during migration.

@@ -139,4 +139,16 @@ Note finali:
 	degli shim (passo rischioso: lo faccio solo dopo tuo OK).
 
 
+## Stato merge (28-10-2025)
+
+La migrazione contenuta in `feature/migration/lib_new_on_main` è stata unita
+in `main` il 28 ottobre 2025. La suite di unit test è passata sul branch PR e
+su `main` dopo il merge. La CI usa la workflow `./github/workflows/flutter_test.yml`.
+
+Se volete rimuovere permanentemente i backup storici (`lib_backup_*`, `lib_merged_*`)
+posso preparare un piano di riscrittura della storia (BFG/git-filter-repo). Questo
+comporta un force-push e coordinazione con i collaboratori; lo eseguo solo dopo
+approvazione esplicita.
+
+
 

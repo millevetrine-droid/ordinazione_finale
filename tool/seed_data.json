@@ -1,0 +1,9 @@
+{
+  "macrocategorie": [
+    { "nome": "Antipasti" },
+    { "nome": "Primi" },
+    { "nome": "Secondi" },
+    { "nome": "Contorni" },
+    { "nome": "Dolci" }
+  ]
+}

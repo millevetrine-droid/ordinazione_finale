@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local backup/merged directories introduced during migration — keep out of git
+lib_backup_pre_merge_*/*
+lib_merged_*/*
+backups/*
+
+# Exclude any embedded in-repo Flutter copies tracked by mistake
+**/flutter/

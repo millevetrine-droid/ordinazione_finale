@@ -64,5 +64,7 @@ jobs:
 
       - name: Run emulator-backed tests
         run: |
-          # Start emulator(s), run the generation of the staff token and the flutter test inside the emulators context
-          firebase emulators:exec --config firebase.json --only firestore,auth "bash -lc 'cd tooling && npm run gen-token && cd .. && flutter test test/session_emulator_rest_test.dart -r expanded'"
+          # Start emulator(s) and run the helper script inside their context. The helper
+          # installs tooling deps, generates the staff token and runs the Dart test.
+          chmod +x tooling/ci/run_emulator_tests.sh
+          firebase emulators:exec --config firebase.json --only firestore,auth -- ./tooling/ci/run_emulator_tests.sh

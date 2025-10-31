@@ -30,14 +30,18 @@ dependencies:
   qr_flutter: ^4.1.0
   image_picker: ^1.2.0
   # Dependencies for migration CLI (pure Dart, no Flutter)
-  googleapis: ^12.0.0
-  googleapis_auth: ^1.6.0
+  # googleapis and googleapis_auth are used by migration CLI scripts (pure Dart).
+  # Move them to dev_dependencies so `flutter pub get` for the app/tests in CI
+  # doesn't require a newer Dart SDK.
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
   fake_cloud_firestore: ^2.5.2
+  # Migration / CLI packages (not needed for app runtime)
+  googleapis: ^12.0.0
+  googleapis_auth: ^1.6.0
 
 flutter:
   uses-material-design: true

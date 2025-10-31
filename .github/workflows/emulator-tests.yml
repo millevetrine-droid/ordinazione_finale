@@ -17,6 +17,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Debug workspace
+        run: |
+          echo "=== Workspace root ==="
+          pwd
+          echo "=== List files (root) ==="
+          ls -la
+          if [ -f .gitmodules ]; then
+            echo "=== .gitmodules content ==="
+            cat .gitmodules
+          else
+            echo "No .gitmodules file present"
+          fi
+
       - name: Cache npm (tooling)
         uses: actions/cache@v4
         with:

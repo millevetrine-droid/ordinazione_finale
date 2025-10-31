@@ -64,6 +64,11 @@ jobs:
       - name: Install firebase-tools
         run: npm install -g firebase-tools
 
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk-version: 'stable'
+
       - name: Install tooling deps (npm)
         run: |
           if [ -f tooling/package-lock.json ]; then

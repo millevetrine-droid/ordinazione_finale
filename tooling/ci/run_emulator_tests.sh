@@ -26,4 +26,12 @@ echo "Running Node end-to-end auth+rules test (no Flutter required)..."
 cd .
 node session_auth_test.js
 
+echo "Running Dart CLI emulator test (if 'dart' is available)..."
+if command -v dart >/dev/null 2>&1; then
+	echo "dart found -> executing dart/session_emulator_cli_test.dart"
+	dart dart/session_emulator_cli_test.dart
+else
+	echo "dart not installed in runner; skipping Dart CLI test"
+fi
+
 echo "Done run_emulator_tests.sh"

@@ -11,7 +11,10 @@ cd "$(dirname "$0")/.." # move to tooling
 echo "Tooling dir: $(pwd)"
 
 echo "Installing npm deps..."
-npm ci
+# Use npm install in CI to tolerate missing package-lock.json in some checkouts.
+# `npm ci` requires package-lock.json; using `npm install` is slightly slower but
+# more robust for CI runs where package-lock may not be present.
+npm install
 
 echo "Generating staff idToken..."
 npm run gen-token

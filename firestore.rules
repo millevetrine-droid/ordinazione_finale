@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Sessions collection used to create/join ephemeral table sessions
+    match /sessions/{sessionId} {
+
+      // Read (get / list) allowed when session is active and not expired.
+      allow get: if isActiveAndNotExpired(resource.data);
+      allow list: if isActiveAndNotExpired(resource.data);
+
+      // Create: only authenticated staff may create sessions.
+      allow create: if request.auth != null && isStaff(request.auth.token);
+
+      // Update: allow staff to modify (e.g., mark attiva=false when ending session)
+      allow update: if request.auth != null && isStaff(request.auth.token);
+
+      // Delete: only staff can delete sessions.
+      allow delete: if request.auth != null && isStaff(request.auth.token);
+    }
+
+    // helper functions
+    function isStaff(token) {
+      // Expect a custom claim 'role' set to 'staff' (or boolean 'staff')
+      return (token.role == 'staff') || (token.staff == true);
+    }
+
+    function isActiveAndNotExpired(data) {
+      return (data.attiva == true) && (data.expiresAt == null || request.time < data.expiresAt);
+    }
+  }
+}

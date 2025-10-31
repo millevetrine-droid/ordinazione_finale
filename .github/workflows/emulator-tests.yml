@@ -78,6 +78,21 @@ jobs:
             echo "tooling/package-lock.json not found -> npm install --prefix tooling"
             npm install --prefix tooling
           fi
+      - name: Debug firebase config and rules
+        run: |
+          echo "=== firebase.json content ==="
+          if [ -f firebase.json ]; then
+            cat firebase.json
+          else
+            echo "firebase.json not found"
+          fi
+          echo "=== Check firestore.rules existence ==="
+          if [ -f firestore.rules ]; then
+            echo "firestore.rules exists - showing head:";
+            head -n 120 firestore.rules || true
+          else
+            echo "firestore.rules not found at repo root"
+          fi
       - name: Run emulator-backed tests (Node)
         run: |
           # Start emulator(s) and run the helper script inside their context.

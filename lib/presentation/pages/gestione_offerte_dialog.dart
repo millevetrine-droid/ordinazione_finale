@@ -108,6 +108,7 @@ class GestioneOfferteDialog {
             
             const SizedBox(height: 10),
             _buildDestinazioneDropdown(
+              context,
               linkTipoSelezionato,
               linkDestinazioneSelezionata,
               controller,
@@ -154,34 +155,82 @@ class GestioneOfferteDialog {
   }
 
   static Widget _buildDestinazioneDropdown(
+    BuildContext context,
     String linkTipo,
     String linkDestinazione,
     GestioneOfferteController controller,
     Function(String?) onChanged,
   ) {
+    // Use a modal selection sheet instead of the DropdownButtonFormField inside
+    // an AlertDialog. This avoids issues where the dropdown menu doesn't open
+    // reliably inside dialogs on some platforms.
     if (linkTipo == 'categoria') {
-      return DropdownButtonFormField<String>(
-        initialValue: linkDestinazione.isEmpty ? null : linkDestinazione,
-        decoration: const InputDecoration(labelText: 'Seleziona Categoria'),
-        items: controller.categorie.map<DropdownMenuItem<String>>((categoria) {
-          return DropdownMenuItem<String>(
-            value: categoria['id'],
-            child: Text('${categoria['nome']}'),
+      return InkWell(
+        onTap: () async {
+          final result = await showModalBottomSheet<String>(
+            context: context,
+            builder: (ctx) {
+              final items = controller.categorie;
+              if (items.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('Nessuna categoria disponibile', style: TextStyle(color: Colors.grey)),
+                );
+              }
+              return ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (ctx2, i) {
+                  final categoria = items[i];
+                  return ListTile(
+                    title: Text('${categoria['nome']}'),
+                    onTap: () => Navigator.of(ctx).pop(categoria['id'] as String),
+                  );
+                },
+              );
+            },
           );
-        }).toList(),
-        onChanged: onChanged,
+          if (result != null) onChanged(result);
+        },
+        child: InputDecorator(
+          decoration: const InputDecoration(labelText: 'Seleziona Categoria'),
+          child: Text(linkDestinazione.isEmpty
+              ? 'Tocca per selezionare...'
+              : (controller.categorie.firstWhere((c) => c['id'] == linkDestinazione, orElse: () => {'nome': '—'})['nome'])),
+        ),
       );
     } else if (linkTipo == 'pietanza') {
-      return DropdownButtonFormField<String>(
-        initialValue: linkDestinazione.isEmpty ? null : linkDestinazione,
-        decoration: const InputDecoration(labelText: 'Seleziona Pietanza'),
-        items: controller.pietanze.map<DropdownMenuItem<String>>((pietanza) {
-          return DropdownMenuItem<String>(
-            value: pietanza['id'],
-            child: Text('${pietanza['nome']} (${pietanza['categoria']})'),
+      return InkWell(
+        onTap: () async {
+          final result = await showModalBottomSheet<String>(
+            context: context,
+            builder: (ctx) {
+              final items = controller.pietanze;
+              if (items.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('Nessuna pietanza disponibile', style: TextStyle(color: Colors.grey)),
+                );
+              }
+              return ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (ctx2, i) {
+                  final pietanza = items[i];
+                  return ListTile(
+                    title: Text('${pietanza['nome']} (${pietanza['categoria']})'),
+                    onTap: () => Navigator.of(ctx).pop(pietanza['id'] as String),
+                  );
+                },
+              );
+            },
           );
-        }).toList(),
-        onChanged: onChanged,
+          if (result != null) onChanged(result);
+        },
+        child: InputDecorator(
+          decoration: const InputDecoration(labelText: 'Seleziona Pietanza'),
+          child: Text(linkDestinazione.isEmpty
+              ? 'Tocca per selezionare...'
+              : (controller.pietanze.firstWhere((p) => p['id'] == linkDestinazione, orElse: () => {'nome': '—'})['nome'])),
+        ),
       );
     } else if (linkTipo == 'ordina') {
       return const Text(
@@ -189,7 +238,7 @@ class GestioneOfferteDialog {
         style: TextStyle(color: Colors.grey, fontSize: 12),
       );
     }
-    
+
     return const SizedBox();
   }
 }

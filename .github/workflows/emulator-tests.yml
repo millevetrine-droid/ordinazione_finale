@@ -71,4 +71,5 @@ jobs:
           # The helper installs tooling deps, generates the staff token and runs the
           # Node-based end-to-end auth + rules test (no Flutter required).
           chmod +x tooling/ci/run_emulator_tests.sh
-          firebase emulators:exec --config firebase.json --only firestore,auth -- ./tooling/ci/run_emulator_tests.sh
+          # Provide a fixed project id so the Auth emulator can start in CI.
+          firebase emulators:exec --project demo-no-project --config firebase.json --only firestore,auth -- ./tooling/ci/run_emulator_tests.sh

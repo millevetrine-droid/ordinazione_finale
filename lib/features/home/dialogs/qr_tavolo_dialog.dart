@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ordinazione/core/providers/session_provider.dart';
 import 'selezione_tavolo_dialog.dart';
+import 'package:ordinazione/core/services/session_service.dart';
 
 class QrTavoloDialog extends StatefulWidget {
   final String? sessionInfo;
@@ -16,6 +17,7 @@ class QrTavoloDialog extends StatefulWidget {
 }
 
 class _QrTavoloDialogState extends State<QrTavoloDialog> {
+  String? _generatedInfo;
   @override
   Widget build(BuildContext context) {
     // Leggi la sessione corrente dal provider, preferendo il valore passato se fornito
@@ -76,6 +78,24 @@ class _QrTavoloDialogState extends State<QrTavoloDialog> {
         ],
       ),
       actions: [
+        // If there's an active remote session, allow closing it from here
+        if (Provider.of<SessionProvider>(context).sessionId != null) ...[
+          TextButton(
+            onPressed: () async {
+              final prov = Provider.of<SessionProvider>(context, listen: false);
+              try {
+                await prov.endCurrentSession();
+                if (!context.mounted) return;
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sessione terminata')));
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Errore terminazione sessione: $e')));
+              }
+            },
+            child: const Text('Termina sessione', style: TextStyle(color: Colors.white)),
+          ),
+        ],
         if (s == null) ...[
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -94,16 +114,31 @@ class _QrTavoloDialogState extends State<QrTavoloDialog> {
 
               if (!context.mounted) return;
 
-              if (numeroTavolo != null) {
+                if (numeroTavolo != null) {
                 final numero = int.tryParse(numeroTavolo);
                 if (numero != null) {
                   Provider.of<SessionProvider>(context, listen: false).setTavolo(numero);
-                  // Chiudi questo dialog e riaprilo per aggiornare la view
+                  // Crea sessione su Firestore e mostra codice QR
+                  try {
+                    final sessionId = await SessionService().createSession(numeroTavolo: numero, idCameriere: 'staff');
+                    final sdata = await SessionService().getSessionById(sessionId);
+                    if (sdata != null) {
+                      _generatedInfo = 'Codice: ${sdata.codice}\nTavolo: ${sdata.numeroTavolo}';
+                      // start listening to this session so UI updates when session is closed
+                      Provider.of<SessionProvider>(context, listen: false).listenToSession(sessionId);
+                    } else {
+                      _generatedInfo = 'Tavolo: $numero';
+                    }
+                  } catch (e) {
+                    _generatedInfo = 'Errore generazione sessione';
+                  }
+                  if (!context.mounted) return;
+                  // Riapri il dialog aggiornato con il codice
                   Navigator.of(context).pop();
                   if (!context.mounted) return;
                   showDialog(
                     context: context,
-                    builder: (_) => const QrTavoloDialog(),
+                    builder: (_) => QrTavoloDialog(sessionInfo: _generatedInfo),
                   );
                 }
               }

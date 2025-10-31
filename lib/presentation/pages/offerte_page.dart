@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:ordinazione/utils/color_utils.dart';
 import 'package:ordinazione/core/services/menu_services/menu_service.dart';
+import 'package:provider/provider.dart';
+// category_items_screen import removed: offers now go straight to cart
 import 'package:ordinazione/features/home/widgets/offerta_card.dart' as offerta_widgets;
+import 'package:ordinazione/core/providers/cart_provider.dart';
+import 'package:ordinazione/core/models/pietanza_model.dart';
+import 'package:ordinazione/presentation/widgets/cart/cart_detailed_view.dart';
 
 class OffertePage extends StatelessWidget {
   const OffertePage({super.key});
@@ -54,10 +59,11 @@ class OffertePage extends StatelessWidget {
                 ),
               ),
 
-              // Lista offerte (caricata da MenuService)
+              // Lista offerte (caricata da MenuService) - now reactive via Stream
               Expanded(
-                child: FutureBuilder<List<Map<String, dynamic>>>(
-                  future: MenuService.getOfferteStatic(),
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: MenuService().offerteStream,
+                  initialData: MenuService().offerteMenu,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -65,7 +71,18 @@ class OffertePage extends StatelessWidget {
                     if (snapshot.hasError) {
                       return Center(child: Text('Errore caricamento offerte: ${snapshot.error}'));
                     }
-                    final offerteSpeciali = snapshot.data ?? [];
+          final offerteSpeciali = (snapshot.data ?? [])
+            .where((o) => o['attiva'] == true || o['attiva'] == 'true')
+            .toList();
+
+                    if (offerteSpeciali.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'Nessuna offerta disponibile al momento',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                      );
+                    }
 
                     return ListView.builder(
                       padding: const EdgeInsets.all(16),
@@ -77,7 +94,7 @@ class OffertePage extends StatelessWidget {
                           descrizione: offerta['sottotitolo'] ?? '',
                           prezzo: (offerta['prezzo'] is num) ? (offerta['prezzo'] as num).toDouble() : double.tryParse(offerta['prezzo']?.toString() ?? '0') ?? 0.0,
                           immagine: offerta['immagine'] ?? '',
-                          onTap: () => _mostraDettaglioOfferta(context, offerta),
+              onTap: () async => await _mostraDettaglioOfferta(context, offerta),
                         );
                       },
                     );
@@ -91,82 +108,51 @@ class OffertePage extends StatelessWidget {
     );
   }
 
-  void _mostraDettaglioOfferta(BuildContext context, Map<String, dynamic> offerta) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.black.withOpacitySafe(0.9),
-        title: Text(
-          offerta['titolo'] ?? '',
-          style: const TextStyle(color: Colors.white),
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                offerta['sottotitolo'] ?? '',
-                style: const TextStyle(color: Colors.white70),
-              ),
-              const SizedBox(height: 16),
-              if ((offerta['pietanzeIncluse'] as List<dynamic>?) != null) const Text(
-                'Include:',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              ...( (offerta['pietanzeIncluse'] as List<dynamic>? ?? []).map((pietanza) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Text(
-                  '• ${pietanza.toString()}',
-                  style: const TextStyle(color: Colors.white70),
-                ),
-              ))),
-              const SizedBox(height: 16),
-              Text(
-                'Prezzo: €${((offerta['prezzo'] is num) ? (offerta['prezzo'] as num).toDouble() : double.tryParse(offerta['prezzo']?.toString() ?? '0') ?? 0.0).toStringAsFixed(2)}',
-                style: const TextStyle(
-                  color: Color(0xFFFF6B8B),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(
-              'Chiudi',
-              style: TextStyle(color: Colors.white),
+  Future<void> _mostraDettaglioOfferta(BuildContext context, Map<String, dynamic> offerta) async {
+    // Convert the offer into a Pietanza-like item and add it to the cart,
+    // then open the cart bottom sheet so the customer can return to browsing.
+    try {
+      final prezzo = (offerta['prezzo'] is num) ? (offerta['prezzo'] as num).toDouble() : double.tryParse(offerta['prezzo']?.toString() ?? '0') ?? 0.0;
+      final piet = Pietanza(
+        id: 'offerta_${offerta['id'] ?? DateTime.now().millisecondsSinceEpoch}',
+        nome: offerta['titolo'] ?? offerta['titolo'] ?? '',
+        descrizione: offerta['sottotitolo'] ?? '',
+        prezzo: prezzo,
+        emoji: offerta['immagine'] ?? offerta['immagine'] ?? '',
+        macrocategoriaId: 'offerte',
+      );
+
+      final cartProvider = Provider.of<CartProvider>(context, listen: false);
+      cartProvider.aggiungiAlCarrello(piet);
+
+      // Show cart detailed view as a bottom sheet (same UX as MenuScreen)
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (context) => Container(
+          height: MediaQuery.of(context).size.height * 0.8,
+          decoration: const BoxDecoration(
+            color: Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              final messenger = ScaffoldMessenger.of(context);
+          child: CartDetailedView(
+            onCheckout: () {
               Navigator.of(context).pop();
-              messenger.showSnackBar(
-                SnackBar(
-                  content: Text('Offerta "${offerta['titolo'] ?? ''}" aggiunta al carrello!'),
-                  backgroundColor: const Color(0xFFFF6B8B),
-                ),
-              );
+              // Attempt to follow the MenuScreen behavior: call checkout flow.
+              // We simply pop the sheet and let upstream UI handle checkout.
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF6B8B),
-            ),
-            child: const Text(
-              'Aggiungi al Carrello',
-              style: TextStyle(color: Colors.white),
-            ),
           ),
-        ],
-      ),
-    );
+        ),
+      );
+    } catch (e) {
+      debugPrint('Errore aggiunta offerta al carrello: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Errore aggiunta offerta al carrello: $e'), backgroundColor: Colors.red),
+      );
+    }
   }
 }

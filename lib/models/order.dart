@@ -1,6 +1,5 @@
 // lib/models/order.dart
 
-import 'package:flutter/material.dart';
 import 'package:ordinazione/models/item.dart';
 
 class Order {

@@ -1,4 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:ordinazione/core/services/session_service.dart';
+import 'package:provider/provider.dart';
+import 'package:ordinazione/core/providers/session_provider.dart';
 
 class QRScannerPage extends StatefulWidget {
   const QRScannerPage({super.key});
@@ -8,6 +13,7 @@ class QRScannerPage extends StatefulWidget {
 }
 
 class _QRScannerPageState extends State<QRScannerPage> {
+  bool _isProcessing = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,28 +63,42 @@ class _QRScannerPageState extends State<QRScannerPage> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      const Text(
-                        'Funzionalità in sviluppo',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4ECDC4),
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                        ),
-                        child: const Text(
-                          'TORNA INDIETRO',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                      SizedBox(
+                        height: 400,
+                        width: 300,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: MobileScanner(
+                            onDetect: (capture) async {
+                              if (_isProcessing) return;
+                              final List<Barcode> barcodes = capture.barcodes;
+                              if (barcodes.isEmpty) return;
+                              final raw = barcodes.first.rawValue;
+                              if (raw == null || raw.isEmpty) return;
+                              setState(() { _isProcessing = true; });
+                              try {
+                                final code = raw.trim();
+                                final s = await SessionService().joinSessionByCode(code);
+                                if (s != null) {
+                                  if (!mounted) return;
+                                  // Update local provider and start remote listen
+                                  final prov = Provider.of<SessionProvider>(context, listen: false);
+                                  prov.setTavolo(s.numeroTavolo);
+                                  prov.listenToSession(s.sessionId);
+                                  Navigator.of(context).pop(s.numeroTavolo.toString());
+                                  return;
+                                }
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sessione non trovata o scaduta'), backgroundColor: Colors.orange));
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Errore: $e'), backgroundColor: Colors.red));
+                                }
+                              } finally {
+                                if (mounted) setState(() { _isProcessing = false; });
+                              }
+                            },
                           ),
                         ),
                       ),

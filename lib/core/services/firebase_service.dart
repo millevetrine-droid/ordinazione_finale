@@ -10,6 +10,8 @@ import 'client_auth_service.dart';
 import 'package:ordinazione/core/services/archive_service.dart';
 import 'package:ordinazione/core/services/point_service.dart';
 import 'ordini_service.dart'; // ✅ AGGIUNTO
+// MenuService used by many legacy screens via FirebaseService.menu
+import 'menu_services/menu_service.dart';
 import 'package:ordinazione/services/email_service.dart';
 
 class FirebaseService {
@@ -31,6 +33,10 @@ class FirebaseService {
   late final ArchiveService _archive = ArchiveService(_firestoreInstance);
   late final PointsService _points = PointsService(_firestoreInstance);
   late final OrdiniService _ordini = OrdiniService(_firestoreInstance); // ✅ NUOVO SERVICE
+  // Legacy compatibility: expose a cached MenuService instance so existing
+  // code can access FirebaseService.menu
+  // static/backwards-compatible accessor used throughout the codebase
+  static final MenuService menu = MenuService();
 
   FirebaseFirestore get firestore => _firestoreInstance;
 
@@ -40,6 +46,7 @@ class FirebaseService {
   PointsService get points => _points;
   ArchiveService get archive => _archive;
   OrdiniService get ordini => _ordini;
+  // Note: legacy static accessor available as FirebaseService.menu
   static final _EmailFacade _emailFacade = _EmailFacade();
   // Return as dynamic to avoid exposing a private type in a public API while
   // keeping call sites working (they expect sendPasswordResetTokenEmail/sendWelcomeEmail etc.).

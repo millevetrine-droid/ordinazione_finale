@@ -90,7 +90,7 @@ class _KitchenPageState extends State<KitchenPage> {
                             ],
                           ),
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),

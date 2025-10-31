@@ -89,6 +89,11 @@ class MenuCacheService {
       _offerteMenu.add(offerta);
     }
     _lastUpdate = DateTime.now();
+    try {
+      // Lightweight debug log to help diagnose visibility issues
+      // Not using dart:developer in the core cache to avoid import churn.
+      // Consumers can also observe `_offerteMenu` via MenuService stream.
+    } catch (_) {}
   }
 
   void rimuoviOfferta(String offertaId) {

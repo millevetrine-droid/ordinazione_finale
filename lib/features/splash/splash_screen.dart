@@ -66,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // previously used pulse animation removed; controller retained for possible future use
     
     _animationController.repeat(reverse: true);
-    debugPrint('Splash (lib_new) initState at ' + DateTime.now().toIso8601String());
+    debugPrint('Splash (lib_new) initState at ${DateTime.now().toIso8601String()}');
     _initializeApp();
   }
 
@@ -93,7 +93,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       }
     });
     try {
-      debugPrint('Splash (lib_new) _initializeApp: start Firebase check at ' + DateTime.now().toIso8601String());
+      debugPrint('Splash (lib_new) _initializeApp: start Firebase check at ${DateTime.now().toIso8601String()}');
       // FASE 1: Firebase (main.dart dovrebbe aver già inizializzato Firebase)
       setState(() {
         _status = 'Connessione a Firebase...';
@@ -117,7 +117,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       });
   final menuRepository = MenuRepository();
   final menuProvider = MenuProvider(menuRepository);
-  debugPrint('Splash (lib_new): created MenuProvider - starting wait loop at ' + DateTime.now().toIso8601String());
+  debugPrint('Splash (lib_new): created MenuProvider - starting wait loop at ${DateTime.now().toIso8601String()}');
   // Attendi caricamento dati (diagnostic: reduce iterations)
   await _waitForInitialData(menuProvider);
       // Se dopo l'attesa i dati non sono pronti proviamo a caricare i dati demo

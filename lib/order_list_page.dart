@@ -85,7 +85,7 @@ class _OrderListPageState extends State<OrderListPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Piatti:'),
-                    ...order.items.where((item) => item.itemStatus == 'In preparazione').map((item) => Text('- ${item.itemName}')).toList(),
+                    ...order.items.where((item) => item.itemStatus == 'In preparazione').map((item) => Text('- ${item.itemName}')),
                   ],
                 ),
               ),

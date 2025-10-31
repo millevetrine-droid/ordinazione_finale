@@ -1,20 +1,54 @@
 import 'dart:async'; // for TimeoutException
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'dart:developer' as dev;
 import 'package:ordinazione/models/pietanza_model.dart';
 import 'package:ordinazione/models/categoria_model.dart';
 
 // Import dei servizi modulari
-import 'menu_cache_service.dart';
-import 'menu_firestore_service.dart';
-import 'menu_data_service.dart';
-import 'menu_test_data_service.dart';
+import 'package:ordinazione/core/services/menu_services/menu_cache_service.dart';
+import 'package:ordinazione/core/services/menu_services/menu_firestore_service.dart';
+import 'package:ordinazione/core/services/menu_services/menu_data_service.dart';
+import 'package:ordinazione/core/services/menu_services/menu_test_data_service.dart';
 
 class MenuService {
+  // Make MenuService a simple singleton so different callers share the same
+  // cache and streams. This keeps the cache consistent across UI reads and
+  // ensures stream listeners receive updates when the cache changes.
+  static final MenuService _instance = MenuService._internal();
+
+  factory MenuService() => _instance;
+
+  MenuService._internal();
   // SERVIZI MODULARI
   final MenuCacheService _cache = MenuCacheService();
   final MenuFirestoreService _firestoreService = MenuFirestoreService();
   final MenuDataService _dataService = MenuDataService();
   final MenuTestDataService _testDataService = MenuTestDataService();
+
+  // Stream controller to broadcast offerte changes to UI listeners.
+  final StreamController<List<Map<String, dynamic>>> _offerteController =
+      StreamController<List<Map<String, dynamic>>>.broadcast();
+
+  Stream<List<Map<String, dynamic>>> get offerteStream => _offerteController.stream;
+
+  /// Public helper to update the local offerte cache and notify listeners.
+  /// Use this for optimistic updates from UI code when remote persistence may
+  /// fail or be slow.
+  void aggiornaOffertaLocaleEAvvisa(Map<String, dynamic> offerta) {
+    try {
+      dev.log('MenuService: aggiornaOffertaLocaleEAvvisa id=${offerta['id']}', name: 'MenuService');
+    } catch (_) {}
+    _dataService.aggiornaOffertaLocale(_cache, offerta);
+    try {
+      debugPrint('📦 (manual) Local cache aggiornata, offerte count=${_cache.offerteMenu.length}');
+    } catch (_) {}
+    try {
+      _offerteController.add(_cache.offerteMenu);
+      try {
+        debugPrint('📣 (manual) Emitting offerte stream update');
+      } catch (_) {}
+    } catch (_) {}
+  }
 
   // GETTER
   List<Pietanza> get pietanzeMenu => _cache.pietanzeMenu;
@@ -48,6 +82,11 @@ class MenuService {
         categorie: data['categorie'] as List<Categoria>,
         offerte: data['offerte'] as List<Map<String, dynamic>>,
       );
+
+      // Publish initial offerte to any listeners
+      try {
+        _offerteController.add(_cache.offerteMenu);
+      } catch (_) {}
 
       dev.log('✅ Menu OTTIMIZZATO: ${pietanzeMenu.length} pietanze, ${categorieMenu.length} categorie, ${offerteMenu.length} offerte', name: 'MenuService');
     } on TimeoutException {
@@ -106,13 +145,51 @@ class MenuService {
 
   // OFFERTE
   Future<void> salvaOfferta(Map<String, dynamic> offerta) async {
-    await _firestoreService.salvaOfferta(offerta);
+    // Try to persist to Firestore, but ensure local cache is updated even if
+    // the remote write fails (e.g. emulator down). This allows the UI to
+    // reflect the newly created offer immediately and avoids blocking the
+    // proprietor when Firestore is temporarily unavailable.
+    dev.log('📥 MenuService.salvaOfferta called for id=${offerta['id']}', name: 'MenuService');
+    try {
+      debugPrint('📥 MenuService.salvaOfferta called for id=${offerta['id']}');
+    } catch (_) {}
+    try {
+      await _firestoreService.salvaOfferta(offerta);
+    } catch (e) {
+      dev.log('⚠️ salvaOfferta remote write failed: $e', name: 'MenuService');
+      try {
+        debugPrint('⚠️ salvaOfferta remote write failed: $e');
+      } catch (_) {}
+      // proceed to update local cache so the offer appears in the UI
+    }
     _dataService.aggiornaOffertaLocale(_cache, offerta);
+    dev.log('📦 Local cache aggiornata, offerte count=${_cache.offerteMenu.length}', name: 'MenuService');
+    try {
+      debugPrint('📦 Local cache aggiornata, offerte count=${_cache.offerteMenu.length}');
+    } catch (_) {}
+    // Notify listeners that offerte changed so UI can update immediately.
+    try {
+      dev.log('📣 Emitting offerte stream update', name: 'MenuService');
+      try {
+        debugPrint('📣 Emitting offerte stream update');
+      } catch (_) {}
+      _offerteController.add(_cache.offerteMenu);
+    } catch (_) {}
   }
 
   Future<void> eliminaOfferta(String offertaId) async {
-    await _firestoreService.eliminaOfferta(offertaId);
+    try {
+      await _firestoreService.eliminaOfferta(offertaId);
+    } catch (e) {
+      // Remote delete failed (emulator/unavailable/permissions). Proceed
+      // to remove locally so UI reflects the proprietor's intent.
+      dev.log('⚠️ eliminaOfferta remote failed: $e', name: 'MenuService');
+    }
     _dataService.rimuoviOffertaLocale(_cache, offertaId);
+    // Notify listeners that the offerte list changed so UI can update.
+    try {
+      _offerteController.add(_cache.offerteMenu);
+    } catch (_) {}
   }
 
   Future<void> aggiornaOrdinamentoOfferte(List<Map<String, dynamic>> offerteOrdinate) async {

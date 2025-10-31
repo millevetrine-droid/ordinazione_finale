@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'gestione_offerte_controller.dart';
 import 'gestione_offerte_dialog.dart';
 import 'gestione_offerte_widgets.dart';
+import 'package:ordinazione/core/services/menu_services/menu_service.dart';
 
 class GestioneOfferteScreen extends StatefulWidget {
   const GestioneOfferteScreen({super.key});
@@ -17,7 +18,10 @@ class _GestioneOfferteScreenState extends State<GestioneOfferteScreen> {
   @override
   void initState() {
     super.initState();
-    _caricaDati();
+    // Delay loading until after the first frame so `ScaffoldMessenger.of(context)`
+    // can safely be used inside `_caricaDati` (avoids dependOnInheritedWidgetOfExactType
+    // called before initState completed).
+    WidgetsBinding.instance.addPostFrameCallback((_) => _caricaDati());
   }
 
   void _caricaDati() async {
@@ -63,20 +67,34 @@ class _GestioneOfferteScreenState extends State<GestioneOfferteScreen> {
 
     final scaffold = ScaffoldMessenger.of(context);
 
-    try {
-      final nuovaOfferta = {
-        'id': idEsistente ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        'titolo': titolo,
-        'sottotitolo': sottotitolo,
-        'prezzo': prezzo,
-        'immagine': immagine,
-        'colore': '#ffff6b8b',
-        'linkTipo': linkTipo,
-        'linkDestinazione': linkDestinazione,
-        'attiva': true,
-        'ordine': _controller.offerte.length,
-      };
+    final nuovaOfferta = {
+      'id': idEsistente ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      'titolo': titolo,
+      'sottotitolo': sottotitolo,
+      'prezzo': prezzo,
+      'immagine': immagine,
+      'colore': '#ffff6b8b',
+      'linkTipo': linkTipo,
+      'linkDestinazione': linkDestinazione,
+      'attiva': true,
+      'ordine': _controller.offerte.length,
+    };
 
+    // Optimistic local update so the owner sees the new offer immediately
+    _controller.aggiungiOffertaLocale(nuovaOfferta);
+    if (mounted) setState(() {});
+
+    // Also update the global MenuService cache and notify listeners so the
+    // public OffertePage (which listens to MenuService().offerteStream)
+    // receives the new offer immediately even if the remote write fails.
+    try {
+      MenuService().aggiornaOffertaLocaleEAvvisa(nuovaOfferta);
+    } catch (e) {
+      // Non-fatal; we still attempt the remote save below.
+      debugPrint('⚠️ Could not notify MenuService cache: $e');
+    }
+
+    try {
       await _controller.salvaOfferta(nuovaOfferta);
       if (!mounted) return;
       _caricaDati();
@@ -85,8 +103,9 @@ class _GestioneOfferteScreenState extends State<GestioneOfferteScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      // Remote save failed — leave local optimistic entry visible but warn the user.
       scaffold.showSnackBar(
-        SnackBar(content: Text('❌ Errore nel salvataggio: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('⚠️ Offerta salvata localmente, sincronizzazione remota fallita: $e'), backgroundColor: Colors.orange),
       );
     }
   }

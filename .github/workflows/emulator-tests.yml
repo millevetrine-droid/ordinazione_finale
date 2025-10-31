@@ -60,38 +60,15 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          # Use the stable channel (latest stable). This ensures CI gets a
-          # recent Dart SDK compatible with the app's current dependencies.
-          flutter-version: 'stable'
-
-      - name: Show flutter version
-        run: flutter --version
-
       - name: Install firebase-tools
         run: npm install -g firebase-tools
 
-      - name: Cache Flutter/Pub
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            ~/.pub-cache/bin
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pub-
-
       - name: Install tooling deps (npm)
         run: npm install --prefix tooling
-
-      - name: Get Flutter packages
-        run: flutter pub get
-
-      - name: Run emulator-backed tests
+      - name: Run emulator-backed tests (Node)
         run: |
-          # Start emulator(s) and run the helper script inside their context. The helper
-          # installs tooling deps, generates the staff token and runs the Dart test.
+          # Start emulator(s) and run the helper script inside their context.
+          # The helper installs tooling deps, generates the staff token and runs the
+          # Node-based end-to-end auth + rules test (no Flutter required).
           chmod +x tooling/ci/run_emulator_tests.sh
           firebase emulators:exec --config firebase.json --only firestore,auth -- ./tooling/ci/run_emulator_tests.sh

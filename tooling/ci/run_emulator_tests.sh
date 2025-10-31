@@ -18,9 +18,8 @@ npm install
 
 echo "Generating staff idToken..."
 npm run gen-token
-
-echo "Running flutter test for emulator REST tests..."
-cd ..
-flutter test test/session_emulator_rest_test.dart -r expanded
+echo "Running Node end-to-end auth+rules test (no Flutter required)..."
+cd .
+node session_auth_test.js
 
 echo "Done run_emulator_tests.sh"

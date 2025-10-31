@@ -39,9 +39,9 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.0
   fake_cloud_firestore: ^2.5.2
-  # Migration / CLI packages (not needed for app runtime)
-  googleapis: ^12.0.0
-  googleapis_auth: ^1.6.0
+  # Migration / CLI packages removed from this pubspec to avoid Dart SDK
+  # version conflicts in CI. Use a separate Dart-only package (tooling/) with
+  # its own pubspec if you need googleapis/googleapis_auth for CLI scripts.
 
 flutter:
   uses-material-design: true

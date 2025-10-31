@@ -1,3 +1,0 @@
-; .gitmodules overridden by CI fixes
-; This file intentionally minimal to avoid submodule errors in CI.
-# No submodules configured here.

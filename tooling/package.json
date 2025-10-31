@@ -1,0 +1,15 @@
+{
+  "name": "ordinazione-tooling",
+  "version": "1.0.0",
+  "description": "Tooling scripts for emulator testing",
+  "private": true,
+  "dependencies": {
+    "axios": "^1.4.0",
+    "firebase-admin": "^11.10.0"
+  },
+  "scripts": {
+    "auth-test": "node session_auth_test.js",
+    "test:emulator": "npm run auth-test",
+    "gen-token": "node generate_staff_token.js"
+  }
+}

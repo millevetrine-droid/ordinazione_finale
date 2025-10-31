@@ -45,7 +45,8 @@ jobs:
           path: |
             ~/.npm
             tooling/node_modules
-          key: ${{ runner.os }}-npm-tooling-${{ hashFiles('tooling/package.json') }}
+          # Use package-lock.json hash for deterministic caching
+          key: ${{ runner.os }}-npm-tooling-${{ hashFiles('tooling/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-npm-tooling-
 
@@ -64,7 +65,7 @@ jobs:
         run: npm install -g firebase-tools
 
       - name: Install tooling deps (npm)
-        run: npm install --prefix tooling
+        run: npm ci --prefix tooling
       - name: Run emulator-backed tests (Node)
         run: |
           # Start emulator(s) and run the helper script inside their context.

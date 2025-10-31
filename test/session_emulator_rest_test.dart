@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
   const projectId = String.fromEnvironment('FB_PROJECT_ID', defaultValue: 'demo-no-project');
   const firestoreHost = String.fromEnvironment('FIRESTORE_EMULATOR_HOST', defaultValue: '127.0.0.1:8080');
 
-  final baseUrl = 'http://$firestoreHost/v1/projects/$projectId/databases/(default)/documents/sessions';
+  const baseUrl = 'http://$firestoreHost/v1/projects/$projectId/databases/(default)/documents/sessions';
 
   group('Session emulator REST tests', () {
     test('create without token should be forbidden', () async {
@@ -64,7 +64,7 @@ Map<String, dynamic> _makeBody() {
       'numeroTavolo': {'integerValue': '99'},
       'idCameriere': {'stringValue': 'dart-staff'},
       'createdAt': {'timestampValue': DateTime.now().toUtc().toIso8601String()},
-      'expiresAt': {'timestampValue': DateTime.now().add(Duration(hours: 1)).toUtc().toIso8601String()},
+      'expiresAt': {'timestampValue': DateTime.now().add(const Duration(hours: 1)).toUtc().toIso8601String()},
       'attiva': {'booleanValue': true}
     }
   };

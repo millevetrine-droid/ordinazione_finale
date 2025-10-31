@@ -65,7 +65,14 @@ jobs:
         run: npm install -g firebase-tools
 
       - name: Install tooling deps (npm)
-        run: npm ci --prefix tooling
+        run: |
+          if [ -f tooling/package-lock.json ]; then
+            echo "tooling/package-lock.json found -> npm ci --prefix tooling"
+            npm ci --prefix tooling
+          else
+            echo "tooling/package-lock.json not found -> npm install --prefix tooling"
+            npm install --prefix tooling
+          fi
       - name: Run emulator-backed tests (Node)
         run: |
           # Start emulator(s) and run the helper script inside their context.

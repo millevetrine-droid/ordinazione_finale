@@ -63,7 +63,12 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.13.6'
+          # Use the stable channel (latest stable). This ensures CI gets a
+          # recent Dart SDK compatible with the app's current dependencies.
+          flutter-version: 'stable'
+
+      - name: Show flutter version
+        run: flutter --version
 
       - name: Install firebase-tools
         run: npm install -g firebase-tools

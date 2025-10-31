@@ -53,12 +53,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDvB6oK-Qm2VwdQkOitBzx2bepmCddFYkI',
-    appId: '1:540813992145:web:9280f641c850cb7c5aa5f0',
-    messagingSenderId: '540813992145',
-    projectId: 'ordinazione-ristorante-71a70',
-    authDomain: 'ordinazione-ristorante-71a70.firebaseapp.com',
-    storageBucket: 'ordinazione-ristorante-71a70.firebasestorage.app',
+    apiKey: 'AIzaSyC4LH5x3oOwpwddGG2glk7zchbME5TbA1w',
+    appId: '1:1015497862392:web:6e7e44c966138a301c5f0d',
+    messagingSenderId: '1015497862392',
+    projectId: 'app-ordinazione-ristorante',
+    authDomain: 'app-ordinazione-ristorante.firebaseapp.com',
+    storageBucket: 'app-ordinazione-ristorante.firebasestorage.app',
   );
-
 }

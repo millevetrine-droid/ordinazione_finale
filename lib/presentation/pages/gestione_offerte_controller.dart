@@ -1,6 +1,5 @@
 import 'package:ordinazione/core/services/menu_services/menu_service.dart';
 import 'package:ordinazione/adapters/offerta_adapter.dart';
-import 'dart:developer' as dev;
 
 class GestioneOfferteController {
   final List<Map<String, dynamic>> _offerte = [];
@@ -38,46 +37,14 @@ class GestioneOfferteController {
   }
 
   Future<void> salvaOfferta(Map<String, dynamic> offerta) async {
-    dev.log('GestioneOfferteController: salvaOfferta START id=${offerta['id']}', name: 'GestioneOfferteController');
-    MenuService menuService;
-    try {
-      menuService = await _inizializzaMenuService();
-    } catch (e) {
-      // If initialization fails (e.g. Firestore temporarily unavailable),
-      // fall back to the singleton instance so we can at least update the
-      // local cache and emit the offerte stream.
-      dev.log('⚠️ GestioneOfferteController: inizializzaMenuService failed: $e - falling back to MenuService()', name: 'GestioneOfferteController');
-      menuService = MenuService();
-    }
-
+    final menuService = await _inizializzaMenuService();
     final normalized = OffertaAdapter.fromNewMap(offerta);
-    try {
-      await menuService.salvaOfferta(normalized);
-      dev.log('GestioneOfferteController: salvaOfferta DONE id=${offerta['id']}', name: 'GestioneOfferteController');
-    } catch (e) {
-      dev.log('❌ GestioneOfferteController: salvaOfferta ERROR: $e', name: 'GestioneOfferteController');
-      rethrow;
-    }
+    await menuService.salvaOfferta(normalized);
   }
 
   Future<void> eliminaOfferta(String idOfferta) async {
     final menuService = await _inizializzaMenuService();
     await menuService.eliminaOfferta(idOfferta);
-    // Also remove locally from the controller list so the owner UI updates
-    // immediately without waiting for a full reload.
-    _offerte.removeWhere((o) => o['id'] == idOfferta);
-  }
-
-  /// Add or replace an offerta in the controller's local list. This is a
-  /// lightweight helper that UI screens can call to reflect an optimistic
-  /// local update while remote persistence occurs.
-  void aggiungiOffertaLocale(Map<String, dynamic> offerta) {
-    final index = _offerte.indexWhere((o) => o['id'] == offerta['id']);
-    if (index >= 0) {
-      _offerte[index] = offerta;
-    } else {
-      _offerte.add(offerta);
-    }
   }
 
   Future<MenuService> _inizializzaMenuService() async {

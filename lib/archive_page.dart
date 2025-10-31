@@ -70,7 +70,7 @@ class _ArchivePageState extends State<ArchivePage> {
                   children: [
                     Text('Stato: ${order.status}'),
                     const Text('Piatti:'),
-                    ...order.items.map((item) => Text('- ${item.itemName}')),
+                    ...order.items.map((item) => Text('- ${item.itemName}')).toList(),
                   ],
                 ),
                 trailing: ElevatedButton(

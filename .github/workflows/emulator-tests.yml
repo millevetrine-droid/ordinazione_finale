@@ -36,7 +36,7 @@ jobs:
           path: |
             ~/.npm
             tooling/node_modules
-          key: ${{ runner.os }}-npm-tooling-${{ hashFiles('tooling/package-lock.json', 'tooling/package.json') }}
+          key: ${{ runner.os }}-npm-tooling-${{ hashFiles('tooling/package.json') }}
           restore-keys: |
             ${{ runner.os }}-npm-tooling-
 
@@ -70,7 +70,7 @@ jobs:
             ${{ runner.os }}-pub-
 
       - name: Install tooling deps (npm)
-        run: npm ci --prefix tooling
+        run: npm install --prefix tooling
 
       - name: Get Flutter packages
         run: flutter pub get

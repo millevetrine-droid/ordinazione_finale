@@ -17,10 +17,16 @@ class _GestioneOfferteScreenState extends State<GestioneOfferteScreen> {
   @override
   void initState() {
     super.initState();
-    _caricaDati();
+    // Delay data load until after the first frame so that `context` can be
+    // used safely (ScaffoldMessenger.of(context) etc.). This avoids the
+    // dependOnInheritedWidgetOfExactType(...) called before initState error.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _caricaDati();
+    });
   }
 
   void _caricaDati() async {
+    // Acquire messenger only when needed and after the frame has been drawn.
     final messenger = ScaffoldMessenger.of(context);
     try {
       await _controller.caricaDati();
@@ -140,8 +146,8 @@ class _GestioneOfferteScreenState extends State<GestioneOfferteScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('🎁 GESTIONE OFFERTE'),
-        backgroundColor: Colors.pink[700],
-        foregroundColor: Colors.white,
+        // Use theme colors so the AppBar matches the rest of the app UI.
+        backgroundColor: Theme.of(context).primaryColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
@@ -153,7 +159,7 @@ class _GestioneOfferteScreenState extends State<GestioneOfferteScreen> {
           ),
         ],
       ),
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _controller.offerte.isEmpty

@@ -1,0 +1,4 @@
+# Code owners: adjust to your team or individuals
+/tooling/ @millevetrine-droid
+/test/ @millevetrine-droid
+/.github/ @millevetrine-droid
